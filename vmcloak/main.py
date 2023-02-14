@@ -436,13 +436,6 @@ def install(ctx, name, dependencies, vm_visible, vrde, vrde_port,
         log.error("Image not found: %s", name)
         exit(1)
 
-    if image.vm and image.vm.lower() != "qemu":
-        log.error(
-            "VMCloak temporarily only supports QEMU vm creation. "
-            f"The image is for: {image.vm}"
-        )
-        exit(1)
-
     if image.mode != "normal":
         log.error(
             "Image is already in use for snapshots. You can no longer "
