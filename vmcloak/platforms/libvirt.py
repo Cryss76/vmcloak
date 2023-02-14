@@ -90,7 +90,7 @@ def _vm_state(name):
     except subprocess.CalledProcessError:
         log.warning("Failed to get state of %s", name)
         return ""
-    return state.rstrip().replace(" ", "")
+    return state.rstrip().replace(b" ", b"")
 
 #
 # Platform API
