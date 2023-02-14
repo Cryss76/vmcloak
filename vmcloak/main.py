@@ -699,13 +699,6 @@ def snapshot(ctx, name, vmname, ip, resolution, ramsize, cpus, hostname,
         log.error("Image not found: %s", name)
         exit(1)
 
-    if image.vm and image.vm.lower() != "qemu":
-        log.error(
-            "VMCloak temporarily only supports QEMU vm creation. "
-            f"The image is for: {image.vm}"
-        )
-        exit(1)
-
     if ip:
         try:
             if not _ip_in_network(ip, image.gateway, image.netmask):
