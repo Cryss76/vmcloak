@@ -64,6 +64,7 @@ def _create_vm(name, attr, iso_path=None, is_snapshot=False):
                            "--noautoconsole",
                            "--os-variant", libvirt_os_variants[attr["osversion"]],
                            "--network", "network=%s" % net]
+
     if not iso_path:
         # Even if we don't have an ISO, we do want a CD-ROM drive
         args.extend(["--disk", "device=cdrom"])
@@ -110,6 +111,9 @@ def create_new_image(name, _, iso_path, attr):
         raise ValueError("Image %s already exists" % attr["path"])
 
     _create_vm(name, attr, iso_path=iso_path)
+
+    if not attr.get("mac"):
+        attr["mac"] = ""
 
 def create_snapshot_vm(image, name, attr):
     if os.path.exists(attr["path"]):
