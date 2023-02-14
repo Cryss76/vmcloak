@@ -320,10 +320,6 @@ def init(ctx, name, adapter, iso, vm, **attr):
     if attr["vrde"] or attr["debug"]:
         attr["vrde"] = attr["vrde_port"]
 
-    if vm.lower() != "qemu":
-        log.error("VMCloak temporarily only supports QEMU vm creation.")
-        exit(1)
-
     try:
         p = repository.platform(vm)
     except ImportError:
