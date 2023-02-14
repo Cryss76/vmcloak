@@ -43,8 +43,8 @@ def _create_image_disk(path, size):
 
 def _create_snapshot_disk(image_path, path):
     log.info("Creating snapshot %s with master %s", path, image_path)
-    subprocess.check_call(["qemu-img", "create", "-f", "qcow2", "-b",
-                           image_path, path])
+    subprocess.check_call(["qemu-img", "create", "-F", "qcow2", "-b",
+                           image_path, "-f", "qcow2", path])
 
 def _create_vm(name, attr, iso_path=None, is_snapshot=False):
     log.info("Create VM instance for %s", name)
