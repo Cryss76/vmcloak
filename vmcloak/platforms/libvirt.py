@@ -126,8 +126,8 @@ def create_snapshot(name):
           name,
           "--name", "vmcloak",
           "--description", "Snapshot created by VMCloak",
-          "--diskspec", "hda,snapshot=internal",
-          "--memspec", "file=,snapshot=internal",
+          "--diskspec", "sda,snapshot=internal",
+          "--memspec", "snapshot=internal",
           "--halt")
 
 def start_image_vm(image, user_attr=None):
