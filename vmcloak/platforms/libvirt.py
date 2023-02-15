@@ -19,15 +19,14 @@ VIRT_INSTALL = ["virt-install", "--connect", "qemu:///system"]
 
 default_net = IPNet("192.168.122.0/24")
 
-# virt-install doesn't seem to have anything newer than win7
 libvirt_os_variants = {
     "winxp": "winxp",
     "win7x86": "win7",
     "win7x64": "win7",
     "win81x86": "win7",
     "win81x64": "win7",
-    "win10x86": "win7",
-    "win10x64": "win7",
+    "win10x86": "win10",
+    "win10x64": "win10",
 }
 
 def virsh(*args, **kwargs):
