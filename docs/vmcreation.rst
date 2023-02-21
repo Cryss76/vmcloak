@@ -127,6 +127,18 @@ The install might be frozen, etc. We will be making an image called 'win10base' 
 
   vmcloak --debug init --win10x64 --hddsize 128 --cpus 2 --ramsize 4096 --network 192.168.30.0/24 --vm qemu --vrde --vrde-port 1 --ip 192.168.30.2 --iso-mount /mnt/win10x64 win10base qemubr0
 
+for libvirt use:
+
+.. code-block:: bash
+
+   vmcloak --debug init --win10x64 --hddsize 128 --cpus 2 --ramsize 4096 --network 192.168.122.0/24 --vm libvirt --vrde --vrde-port -1 --ip 192.168.122.2 --iso-mount /mnt/win10x64 libvirt_win10base01 virbr0
+
+if you are having problems with libvirt being denied of access to the vmcloak folders use:
+
+.. code-block:: bash
+
+   setfacl -R -m user:libvirt-qemu:--x ~
+
 This command can take a long time to complete depending on your system (20-60 minutes).
 
 When the command finishes, the image should be available in the list of images.
@@ -185,6 +197,14 @@ viewed afterwards with the list image command.
 .. code-block:: bash
 
   vmcloak --debug install win10base --recommended
+
+
+
+On libvirt the vnc port must be specified to a value greater then 5900:
+
+.. code-block:: bash
+
+   vmcloak --debug install --vrde --vrde-port 5901 libvirt_win10base01 --recommended
 
 This command can take a long time to complete depending on your system.
 After this command has completed the installed software can be viewed using. ``vmcloak list images``.
@@ -289,13 +309,19 @@ This patching is required so Cuckoo 3 can load its kernel monitor.
 
   vmcloak --debug snapshot --count 5 win10base win10vm_ 192.168.30.10
 
+On libvirt the vnc port must be specified to a value greater then 5900:
+
+.. code-block:: bash
+
+  vmcloak -d snapshot --vrde --vrde-port 5901 --count 3 libvirt_win10base01 libvirt_win10vm_ 192.168.122.10
+
 The command will take a while. It will boot the image, change its IP and hostname, reboot and make a snapshot. And it does this for
 every snapshot.
 
 5. VM importing in Cuckoo 3.
 ----------------------------
 
-Cuckoo 3 can import VMs created by VMCloak. So we do not have to manually
+Cuckoo 3 can, as of now, import QEMU VMs (but not libvirt VMs) created by VMCloak. So we do not have to manually
 edit configs or add them one by one.
 
 To do this, Cuckoo 3 needs to know the path where the VM files are stored. It uses a

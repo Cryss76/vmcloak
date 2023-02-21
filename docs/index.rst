@@ -22,6 +22,7 @@ Contents:
    requirements
    setup
    qemu
+   libvirt
    vmcreation
    config
    network
