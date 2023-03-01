@@ -21,3 +21,4 @@ class ThreemonPatch(Dependency):
         self.upload_dependency("C:\\patchandgo.exe")
         self.a.execute("C:\\patchandgo.exe")
         self.a.remove("C:\\patchandgo.exe")
+        self.a.reboot()

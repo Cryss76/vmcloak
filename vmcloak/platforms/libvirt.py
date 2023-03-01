@@ -62,7 +62,7 @@ def _create_vm(name, attr, iso_path=None, is_snapshot=False):
                            "--disk", attr["path"],
                            "--noautoconsole",
                            "--os-variant", libvirt_os_variants[attr["osversion"]],
-                           "--network", "network=%s" % net]
+                           "--network", "type=direct,source=%s,source.mode=bridge" % net]
 
     if not iso_path:
         # Even if we don't have an ISO, we do want a CD-ROM drive
