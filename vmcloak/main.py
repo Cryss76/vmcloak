@@ -982,3 +982,58 @@ def list_dependencies(name_only=False):
 @click.option("--name-only", is_flag=True, help="Only list the names of existing dependencies")
 def _list_deps(name_only):
     list_dependencies(name_only)
+
+@main.group("remote")
+def remote():
+    """
+    WIP: Enables vmcloak to create VMs on remote Virtual enviorment providers like proxmox.
+    As vmcloak non-remote commands aren't flexible engough.
+    """
+    pass
+
+@remote.command("clone")
+@click.argument("name")
+@click.argument("outname")
+def remote_clone(name, outname):
+    """WIP: Not yet implemented"""
+    log.error("WIP: Not yet implemented")
+    exit(1)
+
+@remote.command("delimg")
+@click.argument("name")
+def remote_delimg(name):
+    """WIP: Not yet implemented"""
+    log.error("WIP: Not yet implemented")
+    exit(1)
+
+@remote.command("delvm")
+@click.argument("name")
+def remote_delvm(name):
+    """WIP: Not yet implemented"""
+    log.error("WIP: Not yet implemented")
+    exit(1)
+
+@remote.command("init")
+def remote_init():
+    """WIP: Not yet implemented"""
+    log.error("WIP: Not yet implemented")
+    exit(1)
+
+@remote.command("install")
+def remote_install():
+    """WIP: Not yet implemented"""
+    log.error("WIP: Not yet implemented")
+    exit(1)
+
+@remote.command("modify")
+def remote_modify():
+    """WIP: Not yet implemented"""
+    log.error("WIP: Not yet implemented")
+    exit(1)
+
+@remote.command("snapshot")
+def remote_snapshot():
+    """WIP: Not yet implemented"""
+    log.error("WIP: Not yet implemented")
+    exit(1)
+
