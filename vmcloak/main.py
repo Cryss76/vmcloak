@@ -16,6 +16,8 @@ from sqlalchemy.orm.session import make_transient
 from vmcloak import repository
 import vmcloak.dependencies
 
+import vmcloak.remote as remote_rep
+
 from vmcloak.agent import Agent
 from vmcloak.constants import VMCLOAK_ROOT
 from vmcloak.dependencies import Python, ThreemonPatch, Finalize
@@ -1014,10 +1016,20 @@ def remote_delvm(name):
     exit(1)
 
 @remote.command("init")
-def remote_init():
+@click.option("--vm", default="qemu", help="Virtual Machinery.", show_default=True)
+@click.pass_context
+def remote_init(ctx, vm, **attr):
     """WIP: Not yet implemented"""
-    log.error("WIP: Not yet implemented")
-    exit(1)
+    attr["debug"] = ctx.meta["debug"]
+
+    try:
+        p = remote_rep.platform(vm)
+    except ImportError:
+        log.error("Platform %r is not supported as a remote platform at this point.", vm)
+        exit(1)
+
+    p = p()
+    p.init()
 
 @remote.command("install")
 def remote_install():
