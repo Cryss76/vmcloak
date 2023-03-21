@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-class remote_platform_interface(ABC):
+class Remote_platform_interface(ABC):
     """Provides a generic interface for using remote Platforms."""
 
     @abstractmethod
