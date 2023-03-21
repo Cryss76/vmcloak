@@ -1016,20 +1016,22 @@ def remote_delvm(name):
     exit(1)
 
 @remote.command("init")
+@click.argument("name")
 @click.option("--vm", default="qemu", help="Virtual Machinery.", show_default=True)
 @click.pass_context
-def remote_init(ctx, vm, **attr):
+def remote_init(ctx, name, vm, **attr):
     """WIP: Not yet implemented"""
     attr["debug"] = ctx.meta["debug"]
 
     try:
         p = remote_rep.platform(vm)
-    except ImportError:
+    except ImportError as error:
         log.error("Platform %r is not supported as a remote platform at this point.", vm)
+        log.error(str(error))
         exit(1)
 
     p = p()
-    p.init()
+    p.init(name)
 
 @remote.command("install")
 def remote_install():
