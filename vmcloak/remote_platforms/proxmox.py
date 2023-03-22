@@ -66,12 +66,12 @@ class Proxmox(Remote_platform_interface):
                           password=self.pw, verify_ssl=False)
     
         node = prox.nodes.get()
-        if not node:
+        if node is None:
             log.error("No nodes in the Server")
             exit(1)
     
         vms = prox.nodes(node[0]["node"]).qemu.get()
-        if not vms:
+        if vms is None:
             log.error("Couldnt get vms list")
             exit(1)
         vms = [vm["name"] for vm in vms]
