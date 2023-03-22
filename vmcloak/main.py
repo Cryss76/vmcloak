@@ -1017,9 +1017,12 @@ def remote_delvm(name):
 
 @remote.command("init")
 @click.argument("name")
+@click.argument("adapter")
+@_add_install_attr
+@click.option("--iso", help="Specify install ISO to use.")
 @click.option("--vm", default="qemu", help="Virtual Machinery.", show_default=True)
 @click.pass_context
-def remote_init(ctx, name, vm, **attr):
+def remote_init(ctx, name, adapter, iso, vm, **attr):
     """WIP: Not yet implemented"""
     attr["debug"] = ctx.meta["debug"]
 
@@ -1030,8 +1033,28 @@ def remote_init(ctx, name, vm, **attr):
         log.error(str(error))
         exit(1)
 
+    attr["adapter"] = adapter
+    ipnet = _get_network(None, attr)
+    ip = _get_ip(ipnet, attr)
+    log.info(f"Image IP: {ip}. Image network: {ipnet}")
+
+    attr["gateway"] = ipnet.bridge_ip
+    attr["netmask"] = ipnet.netmask
+    attr["ip"] = ip
+
+    if not iso:
+        iso_path = os.path.join(attr["tempdir"], "%s.iso" % name)
+        _create_iso(iso_path, attr)
+        remove_iso = True
+    else:
+        iso_path = iso
+        remove_iso = False
+
     p = p()
     p.init(name)
+
+    if remove_iso:
+        os.remove(iso_path)
 
 @remote.command("install")
 def remote_install():
