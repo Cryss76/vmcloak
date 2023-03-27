@@ -1,11 +1,14 @@
+import random
 import yaml
 import logging
+import time
 
 from pathlib import Path
 from proxmoxer import ProxmoxAPI
 
 
 from vmcloak.remote_platforms.remote_platform_interface import Remote_platform_interface
+from vmcloak.ostype import get_os
 
 
 log = logging.getLogger(__name__)
@@ -28,6 +31,7 @@ class Proxmox(Remote_platform_interface):
         self.host = config["host"]
         self.user = config["user"]
         self.pw = config["pw"]
+        self.wait = 25
 
     def clone(self):
         pass
@@ -38,7 +42,7 @@ class Proxmox(Remote_platform_interface):
     def delvm(self):
         pass
 
-    def init(self, name):
+    def init(self, name, _, iso_name, attr):
         # TODO:
         # - Upload iso
         # - create VM
@@ -49,6 +53,8 @@ class Proxmox(Remote_platform_interface):
         if name in vm_name_list:
             log.error("VM already exists.")
 
+        self.create_vm(name, iso_name, attr)
+
     def install(self):
         pass
 
@@ -57,6 +63,40 @@ class Proxmox(Remote_platform_interface):
 
     def snapshot(self):
         pass
+
+    def create_vm(self, name, iso_name, attr):
+        prox = ProxmoxAPI(self.host, user=self.user,
+                          password=self.pw, verify_ssl=False)
+
+        while True:
+            vmid = random.randint(100, 999_999_999)
+            vm_list = prox.nodes(self.node).qemu.get()
+            if vm_list is None:
+                log.error("Couldnt get vm list")
+                quit(1)
+            vm_list = [vm["vmid"] for vm in vm_list]
+            if not vmid in vm_list:
+                break
+        attr["vmid"] = vmid
+
+        prox.nodes(self.node).qemu.post(vmid=vmid, memory=attr["ramsize"], cores=attr["cpus"],
+                                        cdrom="local:iso/%s,media=cdrom,size=4266330K" % iso_name,
+                                        net0="model=e1000,bridge=vmbr0,firewall=1",
+                                        sata0="local-lvm:%i,discard=on" % attr["hddsize"],
+                                        ostype=get_os(attr["osversion"]).name,
+                                        name=name)
+
+        prox.nodes(self.node).qemu(vmid).status.start.post()
+        time.sleep(self.wait)
+
+        running = True
+        while running:
+            vm_status = prox.nodes(self.node).qemu(vmid).status.current.get()
+            if vm_status is None:
+                continue
+            if vm_status["qmpstatus"] == "stopped":
+                running = False
+            time.sleep(self.wait)
 
     def get_vm_name_list(self):
         # TODO:
@@ -69,6 +109,7 @@ class Proxmox(Remote_platform_interface):
         if node is None:
             log.error("No nodes in the Server")
             exit(1)
+        self.node = node[0]["node"]
     
         vms = prox.nodes(node[0]["node"]).qemu.get()
         if vms is None:

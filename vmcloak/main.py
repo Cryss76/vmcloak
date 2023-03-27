@@ -1042,6 +1042,7 @@ def remote_init(ctx, name, adapter, iso, vm, **attr):
     attr["netmask"] = ipnet.netmask
     attr["ip"] = ip
 
+    h = os_from_attr(attr)
     if not iso:
         iso_path = os.path.join(attr["tempdir"], "%s.iso" % name)
         _create_iso(iso_path, attr)
@@ -1051,7 +1052,7 @@ def remote_init(ctx, name, adapter, iso, vm, **attr):
         remove_iso = False
 
     p = p()
-    p.init(name)
+    p.init(name, os, iso_path, attr)
 
     if remove_iso:
         os.remove(iso_path)
