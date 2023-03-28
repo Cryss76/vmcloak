@@ -1023,7 +1023,7 @@ def remote_delvm(name):
 @click.option("--vm", default="qemu", help="Virtual Machinery.", show_default=True)
 @click.pass_context
 def remote_init(ctx, name, adapter, iso, vm, **attr):
-    """WIP: Not yet implemented"""
+    """Creates a template to install dependencies on and then create cuckoo analysis vms of"""
     attr["debug"] = ctx.meta["debug"]
 
     try:
@@ -1031,6 +1031,12 @@ def remote_init(ctx, name, adapter, iso, vm, **attr):
     except ImportError as error:
         log.error("Platform %r is not supported as a remote platform at this point.", vm)
         log.error(str(error))
+        exit(1)
+
+    session = Session()
+    image = session.query(Image).filter_by(name=name).first()
+    if image:
+        log.error("Image already exists: %s", name)
         exit(1)
 
     attr["adapter"] = adapter
@@ -1056,6 +1062,27 @@ def remote_init(ctx, name, adapter, iso, vm, **attr):
 
     if remove_iso:
         os.remove(iso_path)
+
+    log.info("Added image %r to the repository.", name)
+    session.add(Image(id=attr["vmid"],
+                      name=name,
+                      # path=attr["path"],
+                      path = "-",
+                      osversion=attr["osversion"],
+                      servicepack="%s" % h.service_pack,
+                      mode="normal",
+                      ipaddr=attr["ip"],
+                      port=attr["port"],
+                      adapter=attr["adapter"],
+                      netmask=attr["netmask"],
+                      gateway=attr["gateway"],
+                      cpus=attr["cpus"],
+                      ramsize=attr["ramsize"],
+                      vramsize=attr["vramsize"],
+                      vm="%s" % vm,
+                      # paravirtprovider=attr["paravirtprovider"],
+                      mac="-"))
+    session.commit()
 
 @remote.command("install")
 def remote_install():

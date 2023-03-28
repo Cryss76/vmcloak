@@ -31,7 +31,8 @@ class Proxmox(Remote_platform_interface):
         self.host = config["host"]
         self.user = config["user"]
         self.pw = config["pw"]
-        self.wait = 25
+        self.node = config["node"]
+        self.wait = 15
 
     def clone(self):
         pass
@@ -100,18 +101,11 @@ class Proxmox(Remote_platform_interface):
 
     def get_vm_name_list(self):
         # TODO:
-        # - support more than one node
         # - support ssl verify
         prox = ProxmoxAPI(self.host, user=self.user,
                           password=self.pw, verify_ssl=False)
     
-        node = prox.nodes.get()
-        if node is None:
-            log.error("No nodes in the Server")
-            exit(1)
-        self.node = node[0]["node"]
-    
-        vms = prox.nodes(node[0]["node"]).qemu.get()
+        vms = prox.nodes(self.node).qemu.get()
         if vms is None:
             log.error("Couldnt get vms list")
             exit(1)
