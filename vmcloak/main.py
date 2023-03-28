@@ -1059,30 +1059,10 @@ def remote_init(ctx, name, adapter, iso, vm, **attr):
 
     p = p()
     p.init(name, os, iso_path, attr)
+    p.save(name, attr, session, h, vm)
 
     if remove_iso:
         os.remove(iso_path)
-
-    log.info("Added image %r to the repository.", name)
-    session.add(Image(id=attr["vmid"],
-                      name=name,
-                      # path=attr["path"],
-                      path = "-",
-                      osversion=attr["osversion"],
-                      servicepack="%s" % h.service_pack,
-                      mode="normal",
-                      ipaddr=attr["ip"],
-                      port=attr["port"],
-                      adapter=attr["adapter"],
-                      netmask=attr["netmask"],
-                      gateway=attr["gateway"],
-                      cpus=attr["cpus"],
-                      ramsize=attr["ramsize"],
-                      vramsize=attr["vramsize"],
-                      vm="%s" % vm,
-                      # paravirtprovider=attr["paravirtprovider"],
-                      mac="-"))
-    session.commit()
 
 @remote.command("install")
 def remote_install():

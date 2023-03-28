@@ -32,3 +32,7 @@ class Remote_platform_interface(ABC):
     def snapshot(self):
         raise NotImplemented
 
+    @abstractmethod
+    def save(self):
+        raise NotImplemented
+

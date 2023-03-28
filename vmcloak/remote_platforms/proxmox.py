@@ -6,9 +6,9 @@ import time
 from pathlib import Path
 from proxmoxer import ProxmoxAPI
 
-
 from vmcloak.remote_platforms.remote_platform_interface import Remote_platform_interface
 from vmcloak.ostype import get_os
+from vmcloak.repository import Image
 
 
 log = logging.getLogger(__name__)
@@ -98,6 +98,28 @@ class Proxmox(Remote_platform_interface):
             if vm_status["qmpstatus"] == "stopped":
                 running = False
             time.sleep(self.wait)
+
+    def save(self, name, attr, session, h, vm):
+        log.info("Added image %r to the repository.", name)
+        session.add(Image(id=attr["vmid"],
+                          name=name,
+                          # path=attr["path"],
+                          path = "-",
+                          osversion=attr["osversion"],
+                          servicepack="%s" % h.service_pack,
+                          mode="normal",
+                          ipaddr=attr["ip"],
+                          port=attr["port"],
+                          adapter=attr["adapter"],
+                          netmask=attr["netmask"],
+                          gateway=attr["gateway"],
+                          cpus=attr["cpus"],
+                          ramsize=attr["ramsize"],
+                          vramsize=attr["vramsize"],
+                          vm="%s" % vm,
+                          # paravirtprovider=attr["paravirtprovider"],
+                          mac="-"))
+        session.commit()
 
     def get_vm_name_list(self):
         # TODO:
