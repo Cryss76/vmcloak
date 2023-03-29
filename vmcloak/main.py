@@ -1065,10 +1065,60 @@ def remote_init(ctx, name, adapter, iso, vm, **attr):
         os.remove(iso_path)
 
 @remote.command("install")
-def remote_install():
-    """WIP: Not yet implemented"""
-    log.error("WIP: Not yet implemented")
-    exit(1)
+@click.argument("name")
+@click.argument("dependencies", nargs=-1)
+@click.option("--vm-visible", is_flag=True)
+@click.option("--vrde", is_flag=True, help="Enable the VirtualBox Remote Display Protocol.")
+@click.option("--vrde-port", default=3389, help="Specify the VRDE port.")
+@click.option("--force-reinstall", is_flag=True, help="Reinstall even if already installed by VMCloak.")
+@click.option("--no-machine-start", is_flag=True, help="Do not try to start the machine. Assume it is somehow already started and reachable.")
+@click.option("-r", "--recommended", is_flag=True, help="Install and perform recommended software and configuration changes for the OS.")
+@click.option("-d", "--debug", is_flag=True, help="Install applications in debug mode.")
+@click.pass_context
+def remote_install(ctx, name, dependencies, vm_visible, vrde, vrde_port,
+            force_reinstall, no_machine_start, recommended, debug):
+    """Install dependencies on an image. Dependency settings are specified
+    using name.setting=value. Multiple settings per dependency can be given."""
+    image = remote_rep.find_image(name)
+    if not image:
+        log.error("Image not found: %s", name)
+        exit(1)
+
+    if image.mode != "normal":
+        log.error(
+            "Image is already in use for snapshots. You can no longer "
+            "modify it."
+        )
+        exit(1)
+
+    try:
+        image.network
+    except ValueError as e:
+        log.error(f"Image IP network error: {e}")
+        exit(1)
+
+    recom_deps = []
+    if recommended:
+        try:
+            recom_deps = find_recipe(image.osversion)
+            log.info(f"Using recommended packages: {recom_deps}")
+        except InstallError as e:
+            log.error(f"Failed to use recommended dependencies. {e}")
+            exit(1)
+
+    # Install any recommendations first.
+    if recom_deps:
+        recom_deps.extend(dependencies)
+        dependencies = recom_deps
+
+    if not dependencies:
+        log.error("No dependencies given to install")
+        exit(1)
+
+    if not _do_install(image, dependencies,
+                       skip_installed=not force_reinstall,
+                       no_machine_start=no_machine_start):
+        exit(1)
 
 @remote.command("modify")
 def remote_modify():

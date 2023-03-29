@@ -9,6 +9,8 @@ from proxmoxer import ProxmoxAPI
 from vmcloak.remote_platforms.remote_platform_interface import Remote_platform_interface
 from vmcloak.ostype import get_os
 from vmcloak.repository import Image
+from vmcloak.platforms import Machinery
+from vmcloak import remote as remote_rep
 
 
 log = logging.getLogger(__name__)
@@ -121,6 +123,13 @@ class Proxmox(Remote_platform_interface):
                           mac="-"))
         session.commit()
 
+    @staticmethod
+    def start_image_vm(image, _):
+        tmp = Proxmox()
+        prox = ProxmoxAPI(tmp.host, user=tmp.user,
+                          password=tmp.pw, verify_ssl=False)
+        prox.nodes(tmp.node).qemu(image.id).status.start.post()
+
     def get_vm_name_list(self):
         # TODO:
         # - support ssl verify
@@ -134,4 +143,33 @@ class Proxmox(Remote_platform_interface):
         vms = [vm["name"] for vm in vms]
     
         return vms
+
+    @staticmethod
+    def wait_for_shutdown(name):
+        image = remote_rep.find_image(name)
+        tmp = Proxmox()
+        prox = ProxmoxAPI(tmp.host, user=tmp.user,
+                          password=tmp.pw, verify_ssl=False)
+
+        while True:
+            vm_status = prox.nodes(tmp.node).qemu(image.id).status.current.get()
+            if vm_status is None:
+                continue
+            if vm_status["qmpstatus"] == "stopped":
+                break
+            time.sleep(tmp.wait)
+
+    @staticmethod
+    def remove_vm_data(_):
+        """For compatibility purpose only"""
+        pass
+
+
+    class VM(Machinery):
+        """Only exists for compatibility purposes"""
+        def attach_iso(self, _):
+            pass
+
+        def detach_iso(self, _):
+            pass
 

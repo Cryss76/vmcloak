@@ -36,3 +36,15 @@ class Remote_platform_interface(ABC):
     def save(self):
         raise NotImplemented
 
+    @abstractmethod
+    def start_image_vm(self):
+        raise NotImplemented
+
+    @abstractmethod
+    def wait_for_shutdown(self):
+        raise NotImplemented
+
+    @abstractmethod
+    def remove_vm_data(self):
+        raise NotImplemented
+
