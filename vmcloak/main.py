@@ -17,6 +17,7 @@ from vmcloak import repository
 import vmcloak.dependencies
 
 import vmcloak.remote as remote_rep
+from vmcloak.remote import Remote_Image
 
 from vmcloak.agent import Agent
 from vmcloak.constants import VMCLOAK_ROOT
@@ -584,7 +585,7 @@ def _snapshot(image, vmname, attr, interactive):
 
     log.debug("Creating snapshot")
     p.create_snapshot(vmname)
-    p.create_machineinfo_dump(vmname, image)
+    p.create_machineinfo_dump(vmname, image, attr)
 
     # Create a database entry for this snapshot.
     return Snapshot(image_id=image.id, vmname=vmname, hostname=hostname,
@@ -1127,8 +1128,114 @@ def remote_modify():
     exit(1)
 
 @remote.command("snapshot")
-def remote_snapshot():
-    """WIP: Not yet implemented"""
-    log.error("WIP: Not yet implemented")
-    exit(1)
+@click.argument("name")
+@click.argument("vmname")
+@click.argument("ip", required=False)
+@click.option("--resolution", help="Screen resolution.")
+@click.option("--ramsize", type=int, help="Amount of virtual memory to assign. Same as image if not specified.")
+@click.option("--cpus", type=int, help="Amount of CPUs to assign. Same as image if not specified.")
+@click.option("--hostname", help="Hostname for this VM.")
+# @click.option("--adapter", help="Hostonly adapter for this VM.")
+@click.option("--vm-visible", is_flag=True, help="Start the Virtual Machine in GUI mode.")
+@click.option("--count", type=int, help="The amount of snapshots to make.", default=1, show_default=True)
+# @click.option("--share", help="Add shared folder")
+@click.option("--vrde", is_flag=True, help="Enable the VirtualBox Remote Display Protocol.")
+@click.option("--vrde-port", default=3389, help="Specify the VRDE port.")
+@click.option("--interactive", is_flag=True, help="Enable interactive snapshot mode.")
+@click.option("--com1", is_flag=True, help="Enable COM1 for this VM.")
+@click.option("--nopatch", is_flag=True, help="Do not patch the image to be able to load threemon")
+@click.pass_context
+def remote_snapshot(ctx, name, vmname, ip, resolution, ramsize, cpus, hostname,
+                    vm_visible, count, vrde, vrde_port, interactive,
+                    com1, nopatch):
+    """WIP: Create one or more snapshots from an image"""
+    if count and hostname:
+        log.error(
+            "You specified a hostname, but this is not supported when "
+            "creating multiple snapshots at once."
+        )
+        exit(1)
+
+    image = remote_rep.find_image(name)
+    if not image:
+        log.error("Image not found: %s", name)
+        exit(1)
+
+    if ip:
+        try:
+            if not _ip_in_network(ip, image.gateway, image.netmask):
+                log.error(
+                    f"IP {ip} not in same network as gateway "
+                    f"{image.gateway}/{image.netmask}"
+                )
+                exit(1)
+        except ValueError as e:
+            log.error(f"Invalid ip: {e}")
+            exit(1)
+
+    try:
+        image.network
+    except ValueError as e:
+        log.error(f"Image IP network error: {e}")
+        exit(1)
+
+    attr = image.attr()
+    if vrde or ctx.meta["debug"]:
+        attr["vrde"] = vrde_port
+
+    _do_final_changes(nopatch, image, attr)
+
+    ses = Session()
+    try:
+        ses.query(Remote_Image).filter_by(name=name).update(
+            {"mode": "multiattach"}, synchronize_session=False
+        )
+        ses.commit()
+    finally:
+        ses.close()
+
+    p = image.platform
+    attr["imgpath"] = attr.pop("path")
+    attr["vm_visible"] = vm_visible
+    _if_defined(attr, "cpus", cpus)
+    _if_defined(attr, "hostname", hostname)
+    _if_defined(attr, "ramsize", ramsize)
+    _if_defined(attr, "resolution", resolution)
+
+    try:
+        iplist = image.network.get_ips(
+            count=count, start_offset=10, start_ip=ip
+        )
+    except (ValueError, KeyError) as e:
+        log.error(f"Network error: {e}")
+        exit(1)
+
+    for vmname, ip, port in vm_iter(count, vmname, iplist, vrde_port):
+        vmdir = p.prepare_snapshot(vmname, attr)
+        if not vmdir:
+            log.warning("Not creating %r because it exists", vmname)
+            continue
+
+        log.info(f"Creating snapshot: '{vmname}' with IP '{ip}'")
+        if not os.path.exists(vmdir):
+            os.makedirs(vmdir)
+        if "vrde" in attr:
+            attr["vrde"] = port
+        if com1:
+            attr["serial"] = os.path.join(vmdir, "%s.com1" % vmname)
+        if not hostname:
+            attr["hostname"] = random_string(8, 16)
+        attr["ip"] = ip
+        new_snapshot = _snapshot(image, vmname, attr, interactive)
+        new_snapshot.id = attr["vmid"]
+        ses = Session()
+        try:
+            ses.add(new_snapshot)
+            ses.commit()
+        finally:
+            ses.close()
+
+        log.info(f"Snapshot '{vmname}' created")
+
+    log.info("Finished creating snapshots")
 

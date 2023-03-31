@@ -48,3 +48,19 @@ class Remote_platform_interface(ABC):
     def remove_vm_data(self):
         raise NotImplemented
 
+    @abstractmethod
+    def prepare_snapshot(self):
+        raise NotImplemented
+
+    @abstractmethod
+    def create_snapshot_vm(self):
+        raise NotImplemented
+
+    @abstractmethod
+    def create_snapshot(self):
+        raise NotImplemented
+
+    @abstractmethod
+    def create_machineinfo_dump(self):
+        raise NotImplemented
+

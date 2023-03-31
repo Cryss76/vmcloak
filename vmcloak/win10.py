@@ -7,7 +7,7 @@ from vmcloak.abstract import WindowsAutounattended
 class Windows10(WindowsAutounattended):
     name = "win10"
     service_pack = 2
-    interface = "Ethernet"
+    interface = "Ethernet instance 0"
 
     os_version = "10"
 

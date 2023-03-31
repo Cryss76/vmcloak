@@ -9,7 +9,7 @@ def platform(name):
     if not m:
         m = __import__(full)
         m = getattr(m.remote_platforms, name)
-        m = getattr(m, m.name)
+    m = getattr(m, m.name)
 
     return m
 
