@@ -1091,12 +1091,6 @@ def remote_install(ctx, name, dependencies, vm_visible, vrde, vrde_port,
         )
         exit(1)
 
-    try:
-        image.network
-    except ValueError as e:
-        log.error(f"Image IP network error: {e}")
-        exit(1)
-
     recom_deps = []
     if recommended:
         try:
