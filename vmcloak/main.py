@@ -1041,12 +1041,11 @@ def remote_init(ctx, name, adapter, iso, vm, **attr):
         exit(1)
 
     attr["adapter"] = adapter
-    ipnet = _get_network(None, attr)
-    ip = _get_ip(ipnet, attr)
-    log.info(f"Image IP: {ip}. Image network: {ipnet}")
+    ip = attr["ip"]
+    network = attr["network"]
+    log.info(f"Image IP: {ip}. Image network: {network}")
 
-    attr["gateway"] = ipnet.bridge_ip
-    attr["netmask"] = ipnet.netmask
+    attr["netmask"] = "255.255.255.0"
     attr["ip"] = ip
 
     h = os_from_attr(attr)
