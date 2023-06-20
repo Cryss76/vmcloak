@@ -36,6 +36,7 @@ class Proxmox(Remote_platform_interface):
         self.user = config["user"]
         self.pw = config["pw"]
         self.node = config["node"]
+        self.sr = config["sr"]
         self.wait = 15
 
     def clone(self):
@@ -79,7 +80,7 @@ class Proxmox(Remote_platform_interface):
         prox.nodes(self.node).qemu.post(vmid=vmid, memory=attr["ramsize"], cores=attr["cpus"],
                                         cdrom="local:iso/%s,media=cdrom,size=4266330K" % iso_name,
                                         net0="model=e1000,bridge=vmbr0,firewall=1",
-                                        sata0="local-lvm:%i,discard=on" % attr["hddsize"],
+                                        sata0=self.sr + ":%i,discard=on" % attr["hddsize"],
                                         ostype=get_os(attr["osversion"]).name,
                                         name=name)
 
