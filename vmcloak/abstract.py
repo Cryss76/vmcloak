@@ -33,6 +33,7 @@ GENISOIMAGE_WARNINGS = [
     b"add Rock Ridge",
 ]
 
+
 class OperatingSystem(object):
     # Short name for this OS.
     name = None
@@ -194,6 +195,7 @@ class OperatingSystem(object):
         shutil.rmtree(outdir)
         return True
 
+
 class WindowsAutounattended(OperatingSystem):
     """Abstract wrapper around Windows-based Operating Systems that use the
     autounattend.xml file for automated installation, i.e., Windows 7+."""
@@ -284,6 +286,7 @@ class WindowsAutounattended(OperatingSystem):
         # https://technet.microsoft.com/en-us/library/jj612867.aspx
         self.serial_key = serial_key or self.dummy_serial_key
         return True
+
 
 class Dependency(object):
     """Dependency instance. Each software has its own dependency class which
