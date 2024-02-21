@@ -196,6 +196,7 @@ class OperatingSystem(object):
         return True
 
 
+
 class WindowsAutounattended(OperatingSystem):
     """Abstract wrapper around Windows-based Operating Systems that use the
     autounattend.xml file for automated installation, i.e., Windows 7+."""
@@ -571,6 +572,9 @@ class Platform:
     """Interface definition for Platform-modules like Qemu."""
     name = ""
 
+    def __init__(self) -> None:
+        self._default_net = None
+
     def init(self):
         """
         Optional init routine
@@ -579,3 +583,7 @@ class Platform:
         Override if needed.
         """
         pass
+
+    @property
+    def default_net(self):
+        raise NotImplementedError
