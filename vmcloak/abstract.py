@@ -587,6 +587,12 @@ class Platform:
 
     @property
     def default_net(self) -> str:
+        """
+        Returns the default used network of the used platform. (deprecated)
+
+        This property is only here for compatibility
+        and will be removed asap because it breaks modularity.
+        """
         raise NotImplementedError
 
     @property
