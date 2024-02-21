@@ -565,3 +565,17 @@ class Dependency(object):
             )
         finally:
             self.a.remove(script_winpath)
+
+
+class Platform:
+    """Interface definition for Platform-modules like Qemu."""
+    name = ""
+
+    def init(self):
+        """
+        Optional init routine
+
+        Will be ran right after import.
+        Override if needed.
+        """
+        pass
