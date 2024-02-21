@@ -576,7 +576,7 @@ class Platform:
         self._default_net = None
         self._disk_format = None
 
-    def init(self):
+    def init(self) -> None:
         """
         Optional init routine
 
@@ -586,11 +586,11 @@ class Platform:
         pass
 
     @property
-    def default_net(self):
+    def default_net(self) -> str:
         raise NotImplementedError
 
     @property
-    def disk_format(self):
+    def disk_format(self) -> str:
         """
         returns image formats like qcow2 (deprecated)
 
