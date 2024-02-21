@@ -93,8 +93,8 @@ class OperatingSystem(object):
         with open(agent_arch_file, "r") as fp:
             agent_name = fp.read().strip()
 
-        return os.path.join(self.bootstrap_path, "agent", agent_name), \
-               os.path.splitext(agent_name)[1]
+        return (os.path.join(self.bootstrap_path, "agent", agent_name),
+                os.path.splitext(agent_name)[1])
 
     def configure(self, tempdir, product):
         """Configure the setup with settings provided by the user."""
@@ -423,8 +423,8 @@ class Dependency(object):
                     f"entry? {downloadable_file}"
                 )
 
-            filename = downloadable_file.get("filename") or \
-                       filename_from_url(all_urls[0])
+            filename = (downloadable_file.get("filename")
+                        or filename_from_url(all_urls[0]))
 
             if not filename:
                 raise KeyError(
