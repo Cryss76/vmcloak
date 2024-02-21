@@ -329,7 +329,7 @@ def init(ctx, name, adapter, iso, vm, **attr):
         exit(1)
 
     try:
-        p = repository.platform(vm)
+        platform = repository.platform(vm)
     except ImportError:
         log.error("Platform %r is not supported at this point.", vm)
         exit(1)
@@ -341,7 +341,7 @@ def init(ctx, name, adapter, iso, vm, **attr):
         exit(1)
 
     attr["adapter"] = adapter
-    ipnet = _get_network(p, attr)
+    ipnet = _get_network(platform, attr)
     ip = _get_ip(ipnet, attr)
     log.info(f"Image IP: {ip}. Image network: {ipnet}")
 
@@ -360,15 +360,15 @@ def init(ctx, name, adapter, iso, vm, **attr):
 
     try:
         attr["path"] = os.path.join(
-            image_path, "%s.%s" % (name, p.disk_format))
+            image_path, "%s.%s" % (name, platform.disk_format))
 
         # Create new image from ISO
-        p.create_new_image(name, os, iso_path, attr)
+        platform.create_new_image(name, os, iso_path, attr)
     except Exception:
         log.exception("Failed to create %r:", name)
         return
     finally:
-        p.remove_vm_data(name)
+        platform.remove_vm_data(name)
         if remove_iso:
             os.remove(iso_path)
 
