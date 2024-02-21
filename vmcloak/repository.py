@@ -201,14 +201,14 @@ if not os.path.isdir(iso_dst_path):
     os.mkdir(iso_dst_path)
 
 def platform(name):
-    full = 'vmcloak.platforms.' + name
-    m = modules.get(full)
-    if not m:
-        m = __import__(full)
-        m = getattr(m.platforms, name)
-        if hasattr(m, 'initialize'):
-            m.initialize()
-    return m
+    full_module_name = 'vmcloak.platforms.' + name
+    module = modules.get(full_module_name)
+    if not module:
+        module = __import__(full_module_name)
+        module = getattr(module.platforms, name)
+    _platform = getattr(module, name)()
+    _platform.init()
+    return _platform
 
 # TODO: helper function to create missing/fix broken sidecar
 
