@@ -598,3 +598,12 @@ class Platform:
         and will be removed asap because it breaks modularity.
         """
         raise NotImplementedError
+
+    def create_new_image(self, name: str, _, iso_path: str, attr: dict) -> None:
+        """
+        Creates image file for the analysis VM (deprecated)
+
+        The image is supposed to be saved in ~/.vmcloak/image/<platform>
+        Needs rework as this is a Qemu-specific task.
+        """
+        raise NotImplementedError
