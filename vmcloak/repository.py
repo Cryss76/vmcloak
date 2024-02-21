@@ -69,6 +69,7 @@ class Image(Base):
     @reconstructor
     def _init(self):
         self._net_obj = None
+        self._platform = None
 
     @hybrid_property
     def installed(self):
@@ -124,7 +125,9 @@ class Image(Base):
 
     @property
     def platform(self):
-        return platform(self.vm)
+        if not self._platform:
+            self._platform = platform(self.vm)
+        return self._platform
 
     @property
     def network(self):
@@ -137,7 +140,7 @@ class Image(Base):
         return self._net_obj
 
     def VM(self):
-        return platform(self.vm).VM(self.name)
+        return self.platform.VM(self.name)
 
     def attr(self):
         translate = {"ipaddr": "ip"}
