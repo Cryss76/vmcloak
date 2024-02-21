@@ -574,6 +574,7 @@ class Platform:
 
     def __init__(self) -> None:
         self._default_net = None
+        self._disk_format = None
 
     def init(self):
         """
@@ -586,4 +587,14 @@ class Platform:
 
     @property
     def default_net(self):
+        raise NotImplementedError
+
+    @property
+    def disk_format(self):
+        """
+        returns image formats like qcow2 (deprecated)
+
+        This property is only here for compatibility
+        and will be removed asap because it breaks modularity.
+        """
         raise NotImplementedError
