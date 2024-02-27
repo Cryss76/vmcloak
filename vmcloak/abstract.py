@@ -623,3 +623,12 @@ class Platform:
         Needs rework as this is a Qemu-specific task.
         """
         raise NotImplementedError
+
+    def remove_hd(self, path):
+        """
+        Removes the vm image file.
+
+        specific to for deleting vms image files.
+        will be reworked.
+        """
+        raise NotImplementedError
