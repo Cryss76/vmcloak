@@ -19,7 +19,7 @@ from vmcloak.misc import (
     download_file
 )
 from vmcloak.paths import get_path
-from vmcloak.repository import deps_path
+from vmcloak.repository import IPNet, deps_path
 from vmcloak.verify import valid_serial_key
 from vmcloak.rand import random_string
 
@@ -586,7 +586,7 @@ class Platform:
         pass
 
     @property
-    def default_net(self) -> str:
+    def default_net(self) -> IPNet:
         """
         Returns the default used network of the used platform. (deprecated)
 
