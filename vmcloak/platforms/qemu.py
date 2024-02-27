@@ -15,6 +15,7 @@ from vmcloak.repository import vms_path, IPNet
 from vmcloak.rand import random_vendor_mac
 from vmcloak.machineconf import MachineConfDump
 from vmcloak.ostype import get_os
+from vmcloak.abstract import Platform
 
 log = logging.getLogger(__name__)
 name = "QEMU"
@@ -342,3 +343,20 @@ class VM(Machinery):
             )
         m.stdin.write(b"eject cdrom\n")
         m.stdin.flush()
+
+
+class qemu(Platform):
+    name = "QEMU"
+
+    @property
+    def default_net(self) -> IPNet:
+        if not self._default_net:
+            self._default_net = IPNet("192.168.30.0/24")
+        return self._default_net
+
+    @property
+    def disk_format(self) -> str:
+        if not self._disk_format:
+            self._disk_format = "qcow2"
+
+        return self._disk_format
