@@ -22,6 +22,7 @@ from vmcloak.paths import get_path
 from vmcloak.repository import IPNet, deps_path
 from vmcloak.verify import valid_serial_key
 from vmcloak.rand import random_string
+from vmcloak.platforms import Machinery
 
 log = logging.getLogger(__name__)
 
@@ -630,5 +631,14 @@ class Platform:
 
         specific to for deleting vms image files.
         will be reworked.
+        """
+        raise NotImplementedError
+
+    def VM(self, name: str) -> Machinery:
+        """
+        Returns instance for attaching and detaching isos to VM.
+
+        The Inastance must have: attach_iso and detach_iso.
+        Naming is misleading as it suggest vms are beeing controlled over this.
         """
         raise NotImplementedError
