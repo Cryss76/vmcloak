@@ -11,7 +11,7 @@ from re import search
 from pkg_resources import parse_version
 
 from vmcloak.platforms import Machinery
-from vmcloak.repository import vms_path, IPNet
+from vmcloak.repository import Image, vms_path, IPNet
 from vmcloak.rand import random_vendor_mac
 from vmcloak.machineconf import MachineConfDump
 from vmcloak.ostype import get_os
@@ -390,3 +390,10 @@ class qemu(Platform):
 
     def VM(self, name: str) -> VM:
         return VM(name)
+
+    def start_image_vm(self, image: Image, user_attr: dict = None) -> None:
+        """Starts image VM."""
+        attr = image.attr()
+        if user_attr:
+            attr.update(user_attr)
+        _create_vm(image.name, attr)
