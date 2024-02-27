@@ -624,7 +624,7 @@ class Platform:
         """
         raise NotImplementedError
 
-    def remove_hd(self, path):
+    def remove_hd(self, path: str) -> None:
         """
         Removes the vm image file.
 
