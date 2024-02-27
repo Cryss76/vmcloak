@@ -661,3 +661,7 @@ class Platform:
         redundat with create_new Image.
         """
         raise NotImplementedError
+
+    def create_snapshot(self, name: str):
+        """Create the actual snapshot that will be reverted to."""
+        raise NotImplementedError
