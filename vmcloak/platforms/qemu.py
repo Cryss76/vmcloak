@@ -387,3 +387,6 @@ class qemu(Platform):
 
     def remove_hd(self, path: str) -> None:
         os.remove(path)
+
+    def VM(self, name: str) -> VM:
+        return VM(name)
