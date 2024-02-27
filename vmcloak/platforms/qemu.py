@@ -360,3 +360,27 @@ class qemu(Platform):
             self._disk_format = "qcow2"
 
         return self._disk_format
+
+    def create_new_image(self, name: str, _, iso_path: str, attr: dict) -> None:
+        if os.path.exists(attr["path"]):
+            raise ValueError("Image %s already exists" % attr["path"])
+
+        m = _create_vm(name, attr, iso_path=iso_path)
+        m.wait()
+        if m.returncode != 0:
+            raise ValueError(m.returncode)
+
+    def remove_vm_data(self, name: str):
+        m = machines.get(name)
+        if m:
+            log.info("Cleanup VM %s", name)
+            try:
+                if m.returncode is None:
+                    m.kill()
+            except OSError:
+                pass
+        else:
+            log.info("Not running: %s", name)
+        path = os.path.join(vms_path, "%s.%s" % (name, disk_format))
+        if os.path.exists(path):
+            os.remove(path)
