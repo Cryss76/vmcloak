@@ -614,7 +614,7 @@ class Platform:
         """
         raise NotImplementedError
 
-    def remove_vm_data(self, name: str):
+    def remove_vm_data(self, name: str) -> None:
         """
         Remove VM definitions and snapshots but keep disk image intact. (deprecated)
 
