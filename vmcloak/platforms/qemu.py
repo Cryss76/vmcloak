@@ -397,3 +397,19 @@ class qemu(Platform):
         if user_attr:
             attr.update(user_attr)
         _create_vm(image.name, attr)
+
+    def wait_for_shutdown(self, name: str, timeout: int =None) -> None:
+        # TODO: timeout
+        m = machines.get(name)
+        end = None
+        if timeout:
+            end = time.time() + timeout
+        while True:
+            m.poll()
+            if m.returncode is not None:
+                if m.returncode == 0:
+                    return True
+                raise ValueError(f"Non-zero exit code: {m.returncode}")
+            if end and time.time() > end:
+                raise ValueError("Timeout")
+            time.sleep(1)
