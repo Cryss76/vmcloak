@@ -646,3 +646,6 @@ class Platform:
     def start_image_vm(self, image: Image, user_attr: dict = None) -> None:
         """Starts the image VM."""
         raise NotImplementedError
+
+    def wait_for_shutdown(self, name: str, timeout: int =None) -> None:
+        raise NotImplementedError
