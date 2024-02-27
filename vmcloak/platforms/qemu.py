@@ -413,3 +413,13 @@ class qemu(Platform):
             if end and time.time() > end:
                 raise ValueError("Timeout")
             time.sleep(1)
+
+    def prepare_snapshot(self, name: str, attr: dict) -> str:
+        # Snapshots are stored in-line
+        vm_dir = _get_vm_dir(name)
+        path = os.path.join(vm_dir, f"disk.{disk_format}")
+        attr["path"] = path
+        if os.path.exists(path):
+            return ""
+
+        return vm_dir
