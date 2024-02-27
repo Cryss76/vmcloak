@@ -19,7 +19,7 @@ from vmcloak.misc import (
     download_file
 )
 from vmcloak.paths import get_path
-from vmcloak.repository import IPNet, deps_path
+from vmcloak.repository import IPNet, Image, deps_path
 from vmcloak.verify import valid_serial_key
 from vmcloak.rand import random_string
 from vmcloak.platforms import Machinery
@@ -641,4 +641,8 @@ class Platform:
         The Inastance must have: attach_iso and detach_iso.
         Naming is misleading as it suggest vms are beeing controlled over this.
         """
+        raise NotImplementedError
+
+    def start_image_vm(self, image: Image, user_attr: dict = None) -> None:
+        """Starts the image VM."""
         raise NotImplementedError
