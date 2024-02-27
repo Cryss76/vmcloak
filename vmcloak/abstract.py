@@ -653,3 +653,11 @@ class Platform:
     def prepare_snapshot(self, name: str, attr: dict) -> str:
         """Manages snapshots folder in .vmcloak folder."""
         raise NotImplementedError
+
+    def create_snapshot_vm(self, image: Image, name: str, attr: dict) -> None:
+        """
+        creates actual analysis VM.
+
+        redundat with create_new Image.
+        """
+        raise NotImplementedError
