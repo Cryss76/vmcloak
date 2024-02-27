@@ -426,6 +426,6 @@ class qemu(Platform):
 
     def create_snapshot_vm(self, image: Image, name: str, attr: dict) -> None:
         if os.path.exists(attr["path"]):
-        raise ValueError("Snapshot %s already exists" % attr["path"])
+            raise ValueError("Snapshot %s already exists" % attr["path"])
 
-    _create_vm(name, attr, is_snapshot=True)
+        _create_vm(name, attr, is_snapshot=True)
