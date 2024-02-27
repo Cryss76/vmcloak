@@ -649,3 +649,7 @@ class Platform:
 
     def wait_for_shutdown(self, name: str, timeout: int =None) -> None:
         raise NotImplementedError
+
+    def prepare_snapshot(self, name: str, attr: dict) -> str:
+        """Manages snapshots folder in .vmcloak folder."""
+        raise NotImplementedError
