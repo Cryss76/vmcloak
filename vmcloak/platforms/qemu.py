@@ -384,3 +384,6 @@ class qemu(Platform):
         path = os.path.join(vms_path, "%s.%s" % (name, disk_format))
         if os.path.exists(path):
             os.remove(path)
+
+    def remove_hd(self, path: str) -> None:
+        os.remove(path)
