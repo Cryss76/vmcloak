@@ -196,7 +196,6 @@ class OperatingSystem(object):
         return True
 
 
-
 class WindowsAutounattended(OperatingSystem):
     """Abstract wrapper around Windows-based Operating Systems that use the
     autounattend.xml file for automated installation, i.e., Windows 7+."""
@@ -620,7 +619,8 @@ class Platform:
         """
         raise NotImplementedError
 
-    def create_new_image(self, name: str, _, iso_path: str, attr: dict) -> None:
+    def create_new_image(self, name: str, _, iso_path: str, attr: dict
+                         ) -> None:
         """
         Creates image file for the analysis VM (deprecated)
 
@@ -631,11 +631,13 @@ class Platform:
 
     def remove_vm_data(self, name: str) -> None:
         """
-        Remove VM definitions and snapshots but keep disk image intact. (deprecated)
+        Remove VM definitions and snapshots but keep disk image intact.
 
-        Effektively this is an export and successive deletion of the qemu/libvirt vm.
-        It will save the exported file and for example delete the vm managed by libvirt.
-        Needs rework as this is a Qemu-specific task.
+        (deprecated)
+        Effektively this is an export and successive deletion of the qemu/
+        libvirt vm. It will save the exported file and for example delete
+        the vm managed by libvirt. Needs rework as this is a Qemu-
+        pecific task.
         """
         raise NotImplementedError
 
@@ -661,7 +663,7 @@ class Platform:
         """Starts the image VM."""
         raise NotImplementedError
 
-    def wait_for_shutdown(self, name: str, timeout: int =None) -> None:
+    def wait_for_shutdown(self, name: str, timeout: int = None) -> None:
         raise NotImplementedError
 
     def prepare_snapshot(self, name: str, attr: dict) -> str:
