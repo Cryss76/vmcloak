@@ -28,11 +28,13 @@ engine = create_engine("sqlite:///%s" % repository)
 Base = declarative_base()
 Session = sessionmaker(bind=engine)
 
+
 class AlembicVersion(Base):
     """Database schema version. Used for automatic database migrations."""
     __tablename__ = "alembic_version"
 
     version_num = Column(String(32), nullable=False, primary_key=True)
+
 
 def db_migratable():
     ses = Session()
@@ -41,6 +43,7 @@ def db_migratable():
         return v is None or v.version_num != SCHEMA_VERSION
     finally:
         ses.close()
+
 
 class Image(Base):
     """Represents each image that is created and altered along the way."""
@@ -152,6 +155,7 @@ class Image(Base):
             attr[field] = getattr(self, k)
         return attr
 
+
 class Snapshot(Base):
     """Represents each snapshot that has been created."""
     __tablename__ = "snapshot"
@@ -174,6 +178,7 @@ class Snapshot(Base):
     def VM(self):
         return platform(self.image.vm).VM(self.vmname)
 
+
 if not os.path.isdir(conf_path):
     os.mkdir(conf_path)
 
@@ -193,7 +198,6 @@ elif db_exists:
     if not inspect(engine).has_table(AlembicVersion.__tablename__):
         AlembicVersion.__table__.create(engine)
 
-
 if not os.path.isdir(image_path):
     os.mkdir(image_path)
 
@@ -202,6 +206,7 @@ if not os.path.isdir(deps_path):
 
 if not os.path.isdir(iso_dst_path):
     os.mkdir(iso_dst_path)
+
 
 def platform(name):
     full_module_name = 'vmcloak.platforms.' + name
@@ -213,10 +218,7 @@ def platform(name):
     _platform.init()
     return _platform
 
-# TODO: helper function to create missing/fix broken sidecar
 
-# TODO
-# {{{
 def import_image(name):
     full_path = join(image_path, name)
     if name.endswith('.json'):
@@ -231,6 +233,7 @@ def import_image(name):
     else:
         raise NotImplementedError(name)
 
+
 def import_snapshot(name):
     full_path = join(vms_path, name)
     if exists(join(full_path, name + '.vbox')):
@@ -242,11 +245,12 @@ def import_snapshot(name):
         return Snapshot(full_path, name, attr, platform('virtualbox'))
     else:
         raise NotImplementedError(name)
-# }}}
+
 
 def list_images():
     s = Session()
     return s.query(Image).all()
+
 
 def find_used_ips():
     s = Session()
@@ -264,9 +268,11 @@ def find_used_ips():
 
     return ips
 
+
 def list_snapshots():
     s = Session()
     return s.query(Snapshot).all()
+
 
 def any_from_name(name):
     s = Session()
@@ -276,9 +282,11 @@ def any_from_name(name):
     img = s.query(Image).filter_by(name=name).first()
     return img
 
+
 def find_snapshot(name):
     s = Session()
     return s.query(Snapshot).filter_by(vmname=name).first()
+
 
 def remove_image(name):
     s = Session()
@@ -287,12 +295,14 @@ def remove_image(name):
         s.delete(img)
         s.commit()
 
+
 def remove_snapshot(name):
     s = Session()
     snap = s.query(Snapshot).filter_by(vmname=name).first()
     if snap:
         s.delete(snap)
         s.commit()
+
 
 def find_vm(name):
     s = Session()
@@ -304,14 +314,17 @@ def find_vm(name):
         return True, snap
     return False, None
 
+
 def find_image(name):
     session = Session()
     return session.query(Image).filter_by(name=name).first()
 
+
 def image_has_snapshots(name):
     s = Session()
-    t = s.query(Snapshot).filter_by(Snapshot.image.name==name).first()
+    t = s.query(Snapshot).filter_by(Snapshot.image.name == name).first()
     return t
+
 
 def _ipv4_from_interface(interface):
     import socket
@@ -329,6 +342,7 @@ def _ipv4_from_interface(interface):
         return None
     finally:
         s.close()
+
 
 class IPNet:
 
