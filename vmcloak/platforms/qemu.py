@@ -447,3 +447,9 @@ class qemu(Platform):
         log.debug("Flushing snapshot commands to qemu.")
         m.stdin.flush()
         m.wait()
+
+    def create_machineinfo_dump(self, name: str, image: Image) -> None:
+        confdump = confdumps[name]
+        confdump.tags_from_image(image)
+        dump_path = os.path.join(_get_vm_dir(name), confdump.DEFAULT_NAME)
+        confdump.write_dump(dump_path)
