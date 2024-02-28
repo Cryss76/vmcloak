@@ -10,12 +10,11 @@ import shutil
 from re import search
 from pkg_resources import parse_version
 
-from vmcloak.platforms import Machinery
 from vmcloak.repository import Image, vms_path, IPNet
 from vmcloak.rand import random_vendor_mac
 from vmcloak.machineconf import MachineConfDump
 from vmcloak.ostype import get_os
-from vmcloak.abstract import Platform
+from vmcloak.abstract import Platform, Machinery
 
 log = logging.getLogger(__name__)
 name = "QEMU"
