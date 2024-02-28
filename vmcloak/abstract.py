@@ -676,3 +676,6 @@ class Platform:
 
     def clone_disk(self, image: Image, target: str) -> None:
         raise NotImplementedError
+
+    def restore_snapshot(self, name: str, snap_name: str) -> None:
+        raise NotImplementedError

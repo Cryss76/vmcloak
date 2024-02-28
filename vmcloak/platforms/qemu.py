@@ -472,3 +472,7 @@ class qemu(Platform):
     def clone_disk(self, image: Image, target: str) -> None:
         log.info("Cloning disk %s to %s", image.path, target)
         shutil.copy(image.path, target)
+
+    def restore_snapshot(self, name: str, snap_name: str) -> None:
+        path = os.path.join(_get_vm_dir(name), f"disk.{disk_format}")
+        subprocess.check_call(["qemu-img", "snapshot", "-a", snap_name, path])
