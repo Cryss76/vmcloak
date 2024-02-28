@@ -665,3 +665,7 @@ class Platform:
     def create_snapshot(self, name: str) -> None:
         """Create the actual snapshot that will be reverted to."""
         raise NotImplementedError
+
+    def create_machineinfo_dump(self, name: str, image: Image) -> None:
+        """Creates info file in vm folder."""
+        raise NotImplementedError
