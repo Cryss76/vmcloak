@@ -22,7 +22,6 @@ from vmcloak.paths import get_path
 from vmcloak.repository import IPNet, Image, deps_path
 from vmcloak.verify import valid_serial_key
 from vmcloak.rand import random_string
-from vmcloak.platforms import Machinery
 
 log = logging.getLogger(__name__)
 
@@ -569,6 +568,21 @@ class Dependency(object):
             self.a.remove(script_winpath)
 
 
+class Machinery(object):
+    """Base class that is used by dependencies to manage VM-related
+    properties"""
+    def __init__(self, name):
+        self.name = name
+
+    def attach_iso(self, iso_path):
+        """Mount an ISO."""
+        raise NotImplementedError
+
+    def detach_iso(self):
+        """Detach the ISO file."""
+        raise NotImplementedError
+
+
 class Platform:
     """Interface definition for Platform-modules like Qemu."""
     name = ""
@@ -678,19 +692,4 @@ class Platform:
         raise NotImplementedError
 
     def restore_snapshot(self, name: str, snap_name: str) -> None:
-        raise NotImplementedError
-
-
-class Machinery(object):
-    """Base class that is used by dependencies to manage VM-related
-    properties"""
-    def __init__(self, name):
-        self.name = name
-
-    def attach_iso(self, iso_path):
-        """Mount an ISO."""
-        raise NotImplementedError
-
-    def detach_iso(self):
-        """Detach the ISO file."""
         raise NotImplementedError
