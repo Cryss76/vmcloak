@@ -673,3 +673,6 @@ class Platform:
     def remove_vm_snapshot(self, name: str) -> None:
         """Deletes the VM folder created by making a snapshot."""
         raise NotImplementedError
+
+    def clone_disk(self, image: Image, target: str) -> None:
+        raise NotImplementedError
