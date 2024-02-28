@@ -468,3 +468,7 @@ class qemu(Platform):
         path = os.path.join(vms_path, "qemu", name)
         if os.path.exists(path):
             shutil.rmtree(path)
+
+    def clone_disk(self, image: Image, target: str) -> None:
+        log.info("Cloning disk %s to %s", image.path, target)
+        shutil.copy(image.path, target)
