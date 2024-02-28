@@ -662,6 +662,6 @@ class Platform:
         """
         raise NotImplementedError
 
-    def create_snapshot(self, name: str):
+    def create_snapshot(self, name: str) -> None:
         """Create the actual snapshot that will be reverted to."""
         raise NotImplementedError
