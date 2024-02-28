@@ -175,30 +175,6 @@ def _get_vm_dir(vm_name):
     os.makedirs(dirpath, exist_ok=True, mode=0o775)
     return dirpath
 
-def prepare_snapshot(name, attr):
-    # Snapshots are stored in-line
-    vm_dir = _get_vm_dir(name)
-    path = os.path.join(vm_dir, f"disk.{disk_format}")
-    attr["path"] = path
-    if os.path.exists(path):
-        return False
-
-    return vm_dir
-
-def create_new_image(name, _, iso_path, attr):
-    if os.path.exists(attr["path"]):
-        raise ValueError("Image %s already exists" % attr["path"])
-
-    m = _create_vm(name, attr, iso_path=iso_path)
-    m.wait()
-    if m.returncode != 0:
-        raise ValueError(m.returncode)
-
-def create_snapshot_vm(image, name, attr):
-    if os.path.exists(attr["path"]):
-        raise ValueError("Snapshot %s already exists" % attr["path"])
-
-    _create_vm(name, attr, is_snapshot=True)
 
 _DECOMPRESS_BINARIES = {
     "lz4": shutil.which("lz4"),
@@ -223,82 +199,6 @@ def _get_exec_args(memsnapshot_path):
 
 
 MEMORY_SNAPSHOT_NAME = "memory.snapshot"
-def create_snapshot(name):
-    m = machines[name]
-    snapshot_path = os.path.join(_get_vm_dir(name), MEMORY_SNAPSHOT_NAME)
-    confdumps[name].add_machine_field("memory_snapshot", MEMORY_SNAPSHOT_NAME)
-    # Stop the machine so the memory does not change while making the
-    # memory snapshot.
-    m.stdin.write(b"stop\n")
-    m.stdin.write(b"migrate_set_speed 1G\n")
-    # Send the actual memory snapshot command. The args helper tries to find
-    # lz4 of gzip binaries so we can compress the dump.
-    m.stdin.write(
-        f"migrate \"exec:{_get_exec_args(snapshot_path)}\"\n".encode()
-    )
-    m.stdin.write(b"quit\n")
-    log.debug("Flushing snapshot commands to qemu.")
-    m.stdin.flush()
-    m.wait()
-
-def create_machineinfo_dump(name, image):
-    confdump = confdumps[name]
-    confdump.tags_from_image(image)
-    dump_path = os.path.join(_get_vm_dir(name), confdump.DEFAULT_NAME)
-    confdump.write_dump(dump_path)
-
-def start_image_vm(image, user_attr=None):
-    """Start transient VM"""
-    attr = image.attr()
-    if user_attr:
-        attr.update(user_attr)
-    _create_vm(image.name, attr)
-
-def remove_vm_data(name):
-    """Remove VM definitions and snapshots but keep disk image intact"""
-    m = machines.get(name)
-    if m:
-        log.info("Cleanup VM %s", name)
-        try:
-            if m.returncode is None:
-                m.kill()
-        except OSError:
-            pass
-    else:
-        log.info("Not running: %s", name)
-    path = os.path.join(vms_path, "%s.%s" % (name, disk_format))
-    if os.path.exists(path):
-        os.remove(path)
-
-def wait_for_shutdown(name, timeout=None):
-    # TODO: timeout
-    m = machines.get(name)
-    end = None
-    if timeout:
-        end = time.time() + timeout
-    while True:
-        m.poll()
-        if m.returncode is not None:
-            if m.returncode == 0:
-                return True
-            raise ValueError(f"Non-zero exit code: {m.returncode}")
-        if end and time.time() > end:
-            raise ValueError("Timeout")
-        time.sleep(1)
-
-def clone_disk(image, target):
-    log.info("Cloning disk %s to %s", image.path, target)
-    shutil.copy(image.path, target)
-
-def export_vm(image, target):
-    raise NotImplementedError
-
-def restore_snapshot(name, snap_name):
-    path = os.path.join(_get_vm_dir(name), f"disk.{disk_format}")
-    subprocess.check_call(["qemu-img", "snapshot", "-a", snap_name, path])
-
-def remove_hd(path):
-    os.remove(path)
 
 
 def version():
