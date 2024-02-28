@@ -27,12 +27,14 @@ default_net = IPNet("192.168.30.0/24")
 
 QEMU_AMD64 = ["qemu-system-x86_64", "-monitor", "stdio"]
 
+
 def _create_image_disk(path, size):
     log.info("Creating disk %s with size %s", path, size)
     subprocess.check_call(
         ["qemu-img", "create", "-f", "qcow2",
          "-o", "lazy_refcounts=on,cluster_size=2M", path, size]
     )
+
 
 def _create_snapshot_disk(image_path, path):
     log.info("Creating snapshot %s with master %s", path, image_path)
@@ -63,6 +65,7 @@ def _make_pre_v41_args(attr):
         "--enable-kvm"
     ]
 
+
 # From 4.1 the -realtime mlock=off and -device ide-drive
 # are deprecated and those are removed in higher versions.
 def _make_post_v41_args(attr):
@@ -87,6 +90,7 @@ def _make_post_v41_args(attr):
         # "-device", "hda-duplex",
         "-enable-kvm"
     ]
+
 
 def _make_args(attr, disk_placeholder=False, iso=None, display=None):
 
@@ -165,9 +169,6 @@ def _create_vm(name, attr, iso_path=None, is_snapshot=False):
     machines[name] = m
     return m
 
-#
-# Platform API
-#
 
 def _get_vm_dir(vm_name):
     dirpath = os.path.join(vms_path, "qemu", vm_name)
@@ -184,6 +185,7 @@ _DECOMPRESS_COMMANDS = {
     "lz4": "-z > %SNAPSHOT_PATH%",
     "gzip": "-c -3 > %SNAPSHOT_PATH%"
 }
+
 
 def _get_exec_args(memsnapshot_path):
     for tool in ("lz4", "gzip"):
@@ -219,9 +221,6 @@ def version():
 
     return parse_version(match.group().strip().decode())
 
-#
-# Helper class for dependencies
-#
 
 class VM(Machinery):
     def attach_iso(self, iso_path):
@@ -260,7 +259,8 @@ class qemu(Platform):
 
         return self._disk_format
 
-    def create_new_image(self, name: str, _, iso_path: str, attr: dict) -> None:
+    def create_new_image(self, name: str, _, iso_path: str, attr: dict
+                         ) -> None:
         if os.path.exists(attr["path"]):
             raise ValueError("Image %s already exists" % attr["path"])
 
@@ -297,7 +297,7 @@ class qemu(Platform):
             attr.update(user_attr)
         _create_vm(image.name, attr)
 
-    def wait_for_shutdown(self, name: str, timeout: int =None) -> None:
+    def wait_for_shutdown(self, name: str, timeout: int = None) -> None:
         # TODO: timeout
         m = machines.get(name)
         end = None
@@ -331,13 +331,16 @@ class qemu(Platform):
 
     def create_snapshot(self, name: str) -> None:
         m = machines[name]
-        snapshot_path = os.path.join(_get_vm_dir(name), MEMORY_SNAPSHOT_NAME)
-        confdumps[name].add_machine_field("memory_snapshot", MEMORY_SNAPSHOT_NAME)
+        snapshot_path = os.path.join(_get_vm_dir(name),
+                                     MEMORY_SNAPSHOT_NAME)
+        confdumps[name].add_machine_field("memory_snapshot",
+                                          MEMORY_SNAPSHOT_NAME)
         # Stop the machine so the memory does not change while making the
         # memory snapshot.
         m.stdin.write(b"stop\n")
         m.stdin.write(b"migrate_set_speed 1G\n")
-        # Send the actual memory snapshot command. The args helper tries to find
+        # Send the actual memory snapshot command.
+        # The args helper tries to find
         # lz4 of gzip binaries so we can compress the dump.
         m.stdin.write(
             f"migrate \"exec:{_get_exec_args(snapshot_path)}\"\n".encode()
