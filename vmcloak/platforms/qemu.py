@@ -429,3 +429,21 @@ class qemu(Platform):
             raise ValueError("Snapshot %s already exists" % attr["path"])
 
         _create_vm(name, attr, is_snapshot=True)
+
+    def create_snapshot(self, name: str) -> None:
+        m = machines[name]
+        snapshot_path = os.path.join(_get_vm_dir(name), MEMORY_SNAPSHOT_NAME)
+        confdumps[name].add_machine_field("memory_snapshot", MEMORY_SNAPSHOT_NAME)
+        # Stop the machine so the memory does not change while making the
+        # memory snapshot.
+        m.stdin.write(b"stop\n")
+        m.stdin.write(b"migrate_set_speed 1G\n")
+        # Send the actual memory snapshot command. The args helper tries to find
+        # lz4 of gzip binaries so we can compress the dump.
+        m.stdin.write(
+            f"migrate \"exec:{_get_exec_args(snapshot_path)}\"\n".encode()
+        )
+        m.stdin.write(b"quit\n")
+        log.debug("Flushing snapshot commands to qemu.")
+        m.stdin.flush()
+        m.wait()
