@@ -870,7 +870,7 @@ def delvm(name):
     if not obj:
         print("Not found:", name)
         exit(1)
-    obj.platform.remove_vm_data(name)
+    obj.platform.remove_vm_snapshot(name)
     repository.remove_snapshot(name)
 
 

@@ -453,3 +453,18 @@ class qemu(Platform):
         confdump.tags_from_image(image)
         dump_path = os.path.join(_get_vm_dir(name), confdump.DEFAULT_NAME)
         confdump.write_dump(dump_path)
+
+    def remove_vm_snapshot(self, name: str) -> None:
+        m = machines.get(name)
+        if m:
+            log.info("Cleanup VM %s", name)
+            try:
+                if m.returncode is None:
+                    m.kill()
+            except OSError:
+                pass
+        else:
+            log.info("Not running: %s", name)
+        path = os.path.join(vms_path, "qemu", name)
+        if os.path.exists(path):
+            shutil.rmtree(path)

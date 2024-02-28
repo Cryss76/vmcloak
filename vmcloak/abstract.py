@@ -669,3 +669,7 @@ class Platform:
     def create_machineinfo_dump(self, name: str, image: Image) -> None:
         """Creates info file in vm folder."""
         raise NotImplementedError
+
+    def remove_vm_snapshot(self, name: str) -> None:
+        """Deletes the VM folder created by making a snapshot."""
+        raise NotImplementedError
