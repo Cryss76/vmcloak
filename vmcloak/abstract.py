@@ -659,11 +659,11 @@ class Platform:
         """
         raise NotImplementedError
 
-    def start_image_vm(self, image: Image, user_attr: dict = None) -> None:
+    def start_image_vm(self, image: Image, user_attr: dict = {}) -> None:
         """Starts the image VM."""
         raise NotImplementedError
 
-    def wait_for_shutdown(self, name: str, timeout: int = None) -> None:
+    def wait_for_shutdown(self, name: str, timeout: int = 0) -> None:
         raise NotImplementedError
 
     def prepare_snapshot(self, name: str, attr: dict) -> str:

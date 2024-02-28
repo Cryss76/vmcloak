@@ -290,14 +290,14 @@ class qemu(Platform):
     def VM(self, name: str) -> VM:
         return VM(name)
 
-    def start_image_vm(self, image: Image, user_attr: dict = None) -> None:
+    def start_image_vm(self, image: Image, user_attr: dict = {}) -> None:
         """Starts image VM."""
         attr = image.attr()
         if user_attr:
             attr.update(user_attr)
         _create_vm(image.name, attr)
 
-    def wait_for_shutdown(self, name: str, timeout: int = None) -> None:
+    def wait_for_shutdown(self, name: str, timeout: int = 0) -> None:
         # TODO: timeout
         m = machines.get(name)
         end = None
