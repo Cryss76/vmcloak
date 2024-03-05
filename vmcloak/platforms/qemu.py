@@ -246,6 +246,10 @@ class VM(Machinery):
 class qemu(Platform):
     name = "QEMU"
 
+    def __init__(self):
+        super()
+        self._disk_format_priv = None
+
     @property
     def default_net(self) -> IPNet:
         if not self._default_net:
@@ -253,16 +257,16 @@ class qemu(Platform):
         return self._default_net
 
     @property
-    def disk_format(self) -> str:
-        if not self._disk_format:
-            self._disk_format = "qcow2"
+    def _disk_format(self) -> str:
+        if not self._disk_format_priv:
+            self._disk_format_priv = "qcow2"
 
-        return self._disk_format
+        return self._disk_format_priv
 
     def create_new_image(self, name: str, _, iso_path: str, attr: dict
                          ) -> None:
         attr["path"] = os.path.join(
-            attr["path"], "%s.%s" % (name, self.disk_format))
+            attr["path"], "%s.%s" % (name, self._disk_format))
 
         if os.path.exists(attr["path"]):
             raise ValueError("Image %s already exists" % attr["path"])

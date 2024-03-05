@@ -588,7 +588,6 @@ class Platform:
 
     def __init__(self) -> None:
         self._default_net = None
-        self._disk_format = None
 
     def init(self) -> None:
         """
@@ -603,16 +602,6 @@ class Platform:
     def default_net(self) -> IPNet:
         """
         Returns the default used network of the used platform. (deprecated)
-
-        This property is only here for compatibility
-        and will be removed asap because it breaks modularity.
-        """
-        raise NotImplementedError
-
-    @property
-    def disk_format(self) -> str:
-        """
-        returns image formats like qcow2 (deprecated)
 
         This property is only here for compatibility
         and will be removed asap because it breaks modularity.
