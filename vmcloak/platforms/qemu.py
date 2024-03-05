@@ -261,6 +261,9 @@ class qemu(Platform):
 
     def create_new_image(self, name: str, _, iso_path: str, attr: dict
                          ) -> None:
+        attr["path"] = os.path.join(
+            attr["path"], "%s.%s" % (name, self.disk_format))
+
         if os.path.exists(attr["path"]):
             raise ValueError("Image %s already exists" % attr["path"])
 
@@ -269,7 +272,9 @@ class qemu(Platform):
         if m.returncode != 0:
             raise ValueError(m.returncode)
 
-    def remove_vm_data(self, name: str):
+        self._remove_vm_data(name)
+
+    def _remove_vm_data(self, name: str):
         m = machines.get(name)
         if m:
             log.info("Cleanup VM %s", name)
@@ -307,6 +312,7 @@ class qemu(Platform):
             m.poll()
             if m.returncode is not None:
                 if m.returncode == 0:
+                    self._remove_vm_data(name)
                     return True
                 raise ValueError(f"Non-zero exit code: {m.returncode}")
             if end and time.time() > end:

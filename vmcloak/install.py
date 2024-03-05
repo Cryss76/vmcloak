@@ -13,17 +13,20 @@ from vmcloak.repository import Session, Image
 
 log = logging.getLogger(__name__)
 
+
 class InstallError(Exception):
     pass
+
 
 _recipes = {
     "win10x64": ["ie11", "dotnet:4.7.2", "java:7u80", "vcredist:2013",
                  "vcredist:2019", "edge", "carootcert", "adobepdf",
                  "wallpaper", "optimizeos", "disableservices"],
     "win7x64": ["ie11", "dotnet:4.7.2", "java:7u80", "vcredist:2013",
-                 "vcredist:2019", "carootcert", "adobepdf", "wallpaper",
+                "vcredist:2019", "carootcert", "adobepdf", "wallpaper",
                 "optimizeos", "disableservices"]
 }
+
 
 def find_recipe(osversion):
     os_recipe = _recipes.get(osversion)
@@ -34,12 +37,14 @@ def find_recipe(osversion):
 
     return os_recipe
 
+
 def _split_dep_version(dep):
     if ":" not in dep:
         return dep, None
 
     dependencency, version = dep.split(":", 1)
     return dependencency.strip(), version.strip()
+
 
 def parse_dependencies_list(dependencies):
     """Read all key=value settings and dependencies, and versions from the
@@ -74,6 +79,7 @@ def parse_dependencies_list(dependencies):
 
     return deps_versions, settings
 
+
 def _raise_for_non_existing(deps_versions):
     non_existing = set()
 
@@ -87,9 +93,11 @@ def _raise_for_non_existing(deps_versions):
             f"{', '.join(non_existing)}"
         )
 
+
 def _wait_for_agent(agent, timeout=1200):
     # wrap func just to change default argument.
     wait_for_agent(agent, timeout=timeout)
+
 
 class _Installable:
 
@@ -131,6 +139,7 @@ class _Installable:
         )
         if self.dependency.version:
             versions.append(self.dependency.version)
+
 
 class DependencyInstaller:
 
@@ -263,8 +272,8 @@ class DependencyInstaller:
         )
         if skip_installed and self._is_installed(depname, depversion):
             log.debug(
-                f"Dependency: {depname} version={depversion} already satistied "
-                f"during this or previous install run"
+                f"Dependency: {depname} version={depversion} already satistied"
+                f" during this or previous install run"
             )
             return None
 
@@ -379,5 +388,3 @@ class DependencyInstaller:
             self.platform.wait_for_shutdown(self.image.name)
         except ValueError as e:
             log.error(f"Error while waiting for vm to shut down: {e}")
-
-        self.platform.remove_vm_data(self.image.name)

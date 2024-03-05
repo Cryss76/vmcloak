@@ -359,16 +359,13 @@ def init(ctx, name, adapter, iso, vm, **attr):
         remove_iso = False
 
     try:
-        attr["path"] = os.path.join(
-            image_path, "%s.%s" % (name, platform.disk_format))
-
         # Create new image from ISO
+        attr["path"] = image_path
         platform.create_new_image(name, os, iso_path, attr)
     except Exception:
         log.exception("Failed to create %r:", name)
         return
     finally:
-        platform.remove_vm_data(name)
         if remove_iso:
             os.remove(iso_path)
 
@@ -552,8 +549,6 @@ def modify(ctx, name, vm_visible, vrde, vrde_port, iso_path):
         p.wait_for_shutdown(image.name)
     except ValueError as e:
         log.error(f"Error during image shutdown: {e}")
-    finally:
-        p.remove_vm_data(image.name)
 
 
 def _snapshot(image, vmname, attr, interactive):
@@ -701,8 +696,7 @@ def isodownload(win7x64, win10x64, download_to):
 @click.argument("name")
 @click.option("--vm", default="qemu", help="Virtual Machinery.")
 def cleanup(name, vm):
-    p = repository.platform(vm)
-    p.remove_vm_data(name)
+    raise NotImplemented
 
 
 @main.command()
@@ -885,7 +879,6 @@ def delimg(name):
     if image.snapshots:
         print("Image", name, "still has snapshots. Aborting.")
         exit(1)
-    image.platform.remove_vm_data(name)
     try:
         log.info("Removing image %s", image.path)
         image.platform.remove_hd(image.path)

@@ -629,18 +629,6 @@ class Platform:
         """
         raise NotImplementedError
 
-    def remove_vm_data(self, name: str) -> None:
-        """
-        Remove VM definitions and snapshots but keep disk image intact.
-
-        (deprecated)
-        Effektively this is an export and successive deletion of the qemu/
-        libvirt vm. It will save the exported file and for example delete
-        the vm managed by libvirt. Needs rework as this is a Qemu-
-        pecific task.
-        """
-        raise NotImplementedError
-
     def remove_hd(self, path: str) -> None:
         """
         Removes the vm image file.
