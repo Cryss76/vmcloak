@@ -293,8 +293,9 @@ class qemu(Platform):
         if os.path.exists(path):
             os.remove(path)
 
-    def remove_hd(self, path: str) -> None:
-        os.remove(path)
+    def remove_img(self, image: Image) -> None:
+        log.info("Removing image %s", image.path)
+        os.remove(image.path)
 
     def VM(self, name: str) -> VM:
         return VM(name)

@@ -880,8 +880,7 @@ def delimg(name):
         print("Image", name, "still has snapshots. Aborting.")
         exit(1)
     try:
-        log.info("Removing image %s", image.path)
-        image.platform.remove_hd(image.path)
+        image.platform.remove_img(image)
     finally:
         repository.remove_image(name)
 
