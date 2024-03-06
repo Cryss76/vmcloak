@@ -142,8 +142,8 @@ class Image(Base):
 
         return self._net_obj
 
-    def VM(self):
-        return self.platform.VM(self.name)
+    def virt_drive(self):
+        return self.platform.virt_drive(self.name)
 
     def attr(self):
         translate = {"ipaddr": "ip"}
@@ -175,8 +175,8 @@ class Snapshot(Base):
     def platform(self):
         return platform(self.image.vm)
 
-    def VM(self):
-        return platform(self.image.vm).VM(self.vmname)
+    def virt_drive(self):
+        return platform(self.image.vm).virt_drive(self.vmname)
 
 
 if not os.path.isdir(conf_path):

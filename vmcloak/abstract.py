@@ -567,9 +567,8 @@ class Dependency(object):
             self.a.remove(script_winpath)
 
 
-class Machinery(object):
-    """Base class that is used by dependencies to manage VM-related
-    properties"""
+class VirtualDrive(object):
+    """Virtual Drive manager."""
     def __init__(self, name):
         self.name = name
 
@@ -627,13 +626,8 @@ class Platform:
         """
         raise NotImplementedError
 
-    def VM(self, name: str) -> Machinery:
-        """
-        Returns instance for attaching and detaching isos to VM.
-
-        The Inastance must have: attach_iso and detach_iso.
-        Naming is misleading as it suggest vms are beeing controlled over this.
-        """
+    def virt_drive(self, name: str) -> VirtualDrive:
+        """Gets an implemented VirtualDrive instance."""
         raise NotImplementedError
 
     def start_image_vm(self, image: Image, user_attr: dict = {}) -> None:

@@ -14,7 +14,7 @@ from vmcloak.repository import Image, vms_path, IPNet
 from vmcloak.rand import random_vendor_mac
 from vmcloak.machineconf import MachineConfDump
 from vmcloak.ostype import get_os
-from vmcloak.abstract import Platform, Machinery
+from vmcloak.abstract import Platform, VirtualDrive
 
 log = logging.getLogger(__name__)
 name = "QEMU"
@@ -222,7 +222,7 @@ def version():
     return parse_version(match.group().strip().decode())
 
 
-class VM(Machinery):
+class QemuDrive(VirtualDrive):
     def attach_iso(self, iso_path):
         m = machines.get(self.name)
         if not m:
@@ -297,8 +297,8 @@ class qemu(Platform):
         log.info("Removing image %s", image.path)
         os.remove(image.path)
 
-    def VM(self, name: str) -> VM:
-        return VM(name)
+    def virt_drive(self, name: str) -> QemuDrive:
+        return QemuDrive(name)
 
     def start_image_vm(self, image: Image, user_attr: dict = {}) -> None:
         """Starts image VM."""

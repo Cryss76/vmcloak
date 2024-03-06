@@ -157,7 +157,7 @@ class DependencyInstaller:
 
         self.installed = {}
         self.platform = image.platform
-        self.machinery = self.platform.VM(image.name)
+        self.machinery = self.platform.virt_drive(image.name)
         self.os_helper = get_os(image.osversion)
         self.agent = Agent(image.ipaddr, image.port)
         self._prepared = False
