@@ -71,19 +71,14 @@ def clone(name, outname):
         exit(1)
 
     p = image.platform
-    outpath = os.path.join(image_path, "%s.%s" % (outname, p.disk_format))
-    if os.path.exists(outpath):
-        log.error(f"Outpath: {outpath} already exists.")
-        exit(1)
 
-    p.clone_disk(image, outpath)
+    p.clone_disk(image, outname)
 
     # Retain all fields but update the mode, name & path.
     make_transient(image)
     image.id = None
     image.mode = "normal"
     image.name = outname
-    image.path = outpath
 
     session.add(image)
     session.commit()

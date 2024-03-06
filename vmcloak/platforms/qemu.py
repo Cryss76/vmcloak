@@ -10,7 +10,7 @@ import shutil
 from re import search
 from pkg_resources import parse_version
 
-from vmcloak.repository import Image, vms_path, IPNet
+from vmcloak.repository import Image, vms_path, IPNet, image_path
 from vmcloak.rand import random_vendor_mac
 from vmcloak.machineconf import MachineConfDump
 from vmcloak.ostype import get_os
@@ -383,8 +383,16 @@ class qemu(Platform):
             shutil.rmtree(path)
 
     def clone_disk(self, image: Image, target: str) -> None:
-        log.info("Cloning disk %s to %s", image.path, target)
-        shutil.copy(image.path, target)
+        outpath = os.path.join(image_path, "%s.%s" % (target,
+                                                      self._disk_format))
+        if os.path.exists(outpath):
+            log.error(f"Outpath: {outpath} already exists.")
+            exit(1)
+
+        log.info("Cloning disk %s to %s", image.path, outpath)
+        shutil.copy(image.path, outpath)
+
+        image.path = outpath
 
     def restore_snapshot(self, name: str, snap_name: str) -> None:
         path = os.path.join(_get_vm_dir(name), f"disk.{disk_format}")
