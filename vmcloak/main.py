@@ -319,10 +319,6 @@ def init(ctx, name, adapter, iso, vm, **attr):
     if attr["vrde"] or attr["debug"]:
         attr["vrde"] = attr["vrde_port"]
 
-    if vm.lower() != "qemu":
-        log.error("VMCloak temporarily only supports QEMU vm creation.")
-        exit(1)
-
     try:
         platform = repository.platform(vm)
     except ImportError:
@@ -444,13 +440,6 @@ def install(ctx, name, dependencies, vm_visible, vrde, vrde_port,
         log.error("Image not found: %s", name)
         exit(1)
 
-    if image.vm and image.vm.lower() != "qemu":
-        log.error(
-            "VMCloak temporarily only supports QEMU vm creation. "
-            f"The image is for: {image.vm}"
-        )
-        exit(1)
-
     if image.mode != "normal":
         log.error(
             "Image is already in use for snapshots. You can no longer "
@@ -510,13 +499,6 @@ def modify(ctx, name, vm_visible, vrde, vrde_port, iso_path):
     image = repository.find_image(name)
     if not image:
         log.error("Image not found: %s", name)
-        exit(1)
-
-    if image.vm and image.vm.lower() != "qemu":
-        log.error(
-            "VMCloak temporarily only supports QEMU vm creation. "
-            f"The image is for: {image.vm}"
-        )
         exit(1)
 
     if image.mode != "normal":
@@ -731,13 +713,6 @@ def snapshot(ctx, name, vmname, ip, resolution, ramsize, cpus, hostname,
     image = repository.find_image(name)
     if not image:
         log.error("Image not found: %s", name)
-        exit(1)
-
-    if image.vm and image.vm.lower() != "qemu":
-        log.error(
-            "VMCloak temporarily only supports QEMU vm creation. "
-            f"The image is for: {image.vm}"
-        )
         exit(1)
 
     if ip:
