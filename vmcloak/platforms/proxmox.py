@@ -4,6 +4,7 @@ from proxmoxer import ProxmoxAPI
 from pathlib import Path
 
 from vmcloak.abstract import Platform, VirtualDrive
+from vmcloak.repository import IPNet
 
 log = logging.getLogger(__name__)
 
@@ -42,7 +43,14 @@ class proxmox(Platform):
         self.pw = config["pw"]
         self.node = config["node"]
         self.sr = config["sr"]
+        self.net = config["default_net"]
         self.wait = 15
+
+    @property
+    def default_net(self) -> IPNet:
+        if not self._default_net:
+            self._default_net = IPNet(self.net)
+        return self._default_net
 
 
 class ProxmoxDrive(VirtualDrive):
