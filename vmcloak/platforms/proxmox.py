@@ -1,5 +1,6 @@
 import logging
 import yaml
+import random
 from proxmoxer import ProxmoxAPI
 from pathlib import Path
 
@@ -51,6 +52,18 @@ class proxmox(Platform):
         if not self._default_net:
             self._default_net = IPNet(self.net)
         return self._default_net
+
+    def _get_new_random_vmid(self, prox) -> int:
+        while True:
+            vmid = random.randint(100, 999_999_999)
+            vm_list = prox.nodes(self.node).qemu.get()
+            if vm_list is None:
+                log.error("Couldnt get vm list")
+                quit(1)
+            vm_list = [vm["vmid"] for vm in vm_list]
+            if vmid not in vm_list:
+                break
+        return vmid
 
 
 class ProxmoxDrive(VirtualDrive):
