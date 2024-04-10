@@ -48,6 +48,7 @@ class proxmox(Platform):
         self.sr = config["sr"]
         self.net = config["default_net"]
         self.wait = 15
+        self._connection = None
 
     @property
     def default_net(self) -> IPNet:
@@ -62,11 +63,8 @@ class proxmox(Platform):
         if vm_config_file.exists():
             raise ValueError("Image %s already exists" % attr["path"])
 
-        prox = ProxmoxAPI(self.host, user=self.user, password=self.pw,
-                          verify_ssl=False)
-
-        vmid = self._get_new_random_vmid(prox)
-        prox.nodes(self.node).qemu.post(
+        vmid = self._get_new_random_vmid(self.prox)
+        self.prox.nodes(self.node).qemu.post(
             vmid=vmid, memory=attr["ramsize"],
             cores=attr["cpus"],
             cdrom=f"local:iso/{iso_path},media=cdrom,size=4266330K",
@@ -75,12 +73,13 @@ class proxmox(Platform):
             ostype=get_os(attr["osversion"]).name,
             name=name)
 
-        prox.nodes(self.node).qemu(vmid).status.start.post()
+        self.prox.nodes(self.node).qemu(vmid).status.start.post()
         time.sleep(self.wait)
 
         running = True
         while running:
-            vm_status = prox.nodes(self.node).qemu(vmid).status.current.get()
+            vm_status = self.prox.nodes(self.node).qemu(
+                vmid).status.current.get()
             if vm_status is None:
                 continue
             if vm_status["qmpstatus"] == "stopped":
@@ -98,9 +97,7 @@ class proxmox(Platform):
         vm_config_file = Path(image.path)
         vmid = yaml.safe_load(vm_config_file.read_text())["vmid"]
 
-        prox = ProxmoxAPI(self.host, user=self.user, password=self.pw,
-                          verify_ssl=False)
-        prox.nodes(self.node).qemu(vmid).delete()
+        self.prox.nodes(self.node).qemu(vmid).delete()
 
         vm_config_file.unlink()
 
@@ -113,11 +110,9 @@ class proxmox(Platform):
         log.info("Cloning %s to %s", image.name, target)
 
         oldvmid = yaml.safe_load(Path(image.path).read_text())["vmid"]
-        prox = ProxmoxAPI(self.host, user=self.user, password=self.pw,
-                          verify_ssl=False)
 
-        new_vmid = self._get_new_random_vmid(prox)
-        prox.nodes(self.node).qemu(oldvmid).clone.post(
+        new_vmid = self._get_new_random_vmid(self.prox)
+        self.prox.nodes(self.node).qemu(oldvmid).clone.post(
             newid=new_vmid, name=target)
 
         config_file.write_text(yaml.dump({"vmid": new_vmid}))
@@ -135,6 +130,21 @@ class proxmox(Platform):
             if vmid not in vm_list:
                 break
         return vmid
+
+    @property
+    def prox(self):
+        if self._connection:
+            try:
+                self._connection.nodes(self.node).status.get()
+            except Exception:
+                # fine beacause of the following reconnect with ProxmoxAPI
+                pass
+            else:
+                return self._connection
+
+        self._connection = ProxmoxAPI(self.host, user=self.user,
+                                      password=self.pw, verify_ssl=False)
+        return self._connection
 
 
 class ProxmoxDrive(VirtualDrive):
