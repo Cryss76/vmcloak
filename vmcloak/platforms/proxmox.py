@@ -119,6 +119,13 @@ class proxmox(Platform):
 
         image.path = f"{config_file}"
 
+    def start_image_vm(self, image: Image, user_attr: dict = {}) -> None:
+        # TODO: add support for updating image attr.
+        _ = user_attr
+
+        vmid = yaml.safe_load(Path(image.path).read_text())["vmid"]
+        self.prox.nodes(self.node).qemu(vmid).status.start.post()
+
     def virt_drive(self, name: str) -> VirtualDrive:
         return ProxmoxDrive(name)
 
