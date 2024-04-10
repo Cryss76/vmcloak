@@ -6,7 +6,7 @@ from proxmoxer import ProxmoxAPI
 from pathlib import Path
 
 from vmcloak.abstract import Platform, VirtualDrive
-from vmcloak.repository import IPNet, Image
+from vmcloak.repository import IPNet, Image, image_path
 from vmcloak.ostype import get_os
 
 log = logging.getLogger(__name__)
@@ -103,6 +103,26 @@ class proxmox(Platform):
         prox.nodes(self.node).qemu(vmid).delete()
 
         vm_config_file.unlink()
+
+    def clone_disk(self, image: Image, target: str) -> None:
+        config_file = Path(f"{image_path}/proxmox/{target}.yml")
+        if config_file.exists():
+            log.error(f"Outpath: {config_file} already exists.")
+            exit(1)
+
+        log.info("Cloning %s to %s", image.name, target)
+
+        oldvmid = yaml.safe_load(Path(image.path).read_text())["vmid"]
+        prox = ProxmoxAPI(self.host, user=self.user, password=self.pw,
+                          verify_ssl=False)
+
+        new_vmid = self._get_new_random_vmid(prox)
+        prox.nodes(self.node).qemu(oldvmid).clone.post(
+            newid=new_vmid, name=target)
+
+        config_file.write_text(yaml.dump({"vmid": new_vmid}))
+
+        image.path = f"{config_file}"
 
     def _get_new_random_vmid(self, prox) -> int:
         while True:
