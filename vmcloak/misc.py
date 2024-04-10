@@ -25,6 +25,7 @@ except ImportError:
 
 log = logging.getLogger(__name__)
 
+
 def copytreelower(srcdir, dstdir):
     """Copies the source directory as lowercase to the destination directory.
 
@@ -55,6 +56,7 @@ def copytreelower(srcdir, dstdir):
             os.chmod(os.path.join(dstdir, path.lower()),
                      stat.S_IRUSR | stat.S_IWUSR)
 
+
 def copytreeinto(srcdir, dstdir):
     """Copy one directory into another directory.
 
@@ -76,6 +78,7 @@ def copytreeinto(srcdir, dstdir):
             shutil.copy(path_in, path_out)
         else:
             copytreeinto(path_in, path_out)
+
 
 def ini_read(path):
     ret, section = {}, None
@@ -106,6 +109,7 @@ def ini_read(path):
             ret[section].append("%s=%s" % (a.strip(), b.strip()))
     return mode, ret
 
+
 def ini_write(path, mode, data):
     lines = [""]
     for key in sorted(data.keys()):
@@ -115,12 +119,14 @@ def ini_write(path, mode, data):
         lines.append("")
     open(path, "wb").write("\r\n".join(lines).encode(mode))
 
+
 def ini_add(data, section, value):
     if section not in data:
         data[section] = []
 
     if value not in data[section]:
         data[section].append(value)
+
 
 def ini_delete(data, section, value):
     if section not in data:
@@ -129,6 +135,7 @@ def ini_delete(data, section, value):
     for idx, row in enumerate(data[section]):
         if row == value:
             del data[section][idx]
+
 
 def ini_merge(data, ini2, overwrite=True):
     mode, data2 = ini_read(ini2)
@@ -152,6 +159,7 @@ def ini_merge(data, ini2, overwrite=True):
             else:
                 data[section].append(value)
 
+
 def ini_read_dict(path):
     c = ConfigParser()
     c.read(path)
@@ -160,6 +168,7 @@ def ini_read_dict(path):
     for section in c.sections():
         ret[section] = dict(c.items(section))
     return ret
+
 
 def sha1_file(path):
     """Calculate the sha1 hash of a file."""
@@ -175,6 +184,7 @@ def sha1_file(path):
 
     return h.hexdigest()
 
+
 def wait_for_agent(a, timeout=180):
     """Wait for the Agent to come up."""
     now = time.time()
@@ -183,10 +193,11 @@ def wait_for_agent(a, timeout=180):
             log.debug(f"Sending ping to agent on: {a.ipaddr}:{a.port}")
             a.ping()
             return
-        except:
+        except Exception:
             log.debug("No response")
             time.sleep(1)
     raise IOError("Agent not online within %s second(s)" % timeout)
+
 
 def drop_privileges(user):
     if not HAVE_PWD:
@@ -206,6 +217,7 @@ def drop_privileges(user):
     except OSError as e:
         sys.exit("Failed to drop privileges: %s" % e)
 
+
 def import_plugins(dirpath, module_prefix, namespace, class_):
     """Import plugins of type `class` located at `dirpath` into the
     `namespace` that starts with `module_prefix`. If `dirpath` represents a
@@ -224,14 +236,17 @@ def import_plugins(dirpath, module_prefix, namespace, class_):
         plugins.append(subclass)
     return plugins
 
+
 def ipaddr_increase(ipaddr):
     """Increases the IP address."""
     addr = struct.unpack(">I", socket.inet_aton(ipaddr))[0]
     return socket.inet_ntoa(struct.pack(">I", addr + 1))
 
+
 def filename_from_url(url):
     """Return the filename from a given url."""
     return os.path.basename(urllib.parse.urlparse(url).path)
+
 
 def download_file(url, filepath):
     """Download the file from url and store it in the given filepath."""
@@ -263,5 +278,3 @@ def download_file(url, filepath):
         )
     )
     return True, sha1_hash.hexdigest()
-
-
