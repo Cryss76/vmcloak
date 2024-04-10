@@ -57,12 +57,15 @@ class proxmox(Platform):
 
     def create_new_image(self, name: str, _, iso_path: str, attr: dict
                          ) -> None:
+        attr["path"] = f"{attr['path']}/proxmox/{name}.yml"
+        vm_config_file = Path(attr["path"])
+        if vm_config_file.exists():
+            raise ValueError("Image %s already exists" % attr["path"])
+
         prox = ProxmoxAPI(self.host, user=self.user, password=self.pw,
                           verify_ssl=False)
 
         vmid = self._get_new_random_vmid(prox)
-        attr["vmid"] = vmid
-
         prox.nodes(self.node).qemu.post(
             vmid=vmid, memory=attr["ramsize"],
             cores=attr["cpus"],
@@ -83,6 +86,9 @@ class proxmox(Platform):
             if vm_status["qmpstatus"] == "stopped":
                 running = False
             time.sleep(self.wait)
+
+        vm_config = yaml.dump({"vmid": vmid})
+        vm_config_file.write_text(vm_config)
 
         attr["mac"] = ""
 
