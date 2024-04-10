@@ -1,11 +1,13 @@
 import logging
 import yaml
 import random
+import time
 from proxmoxer import ProxmoxAPI
 from pathlib import Path
 
 from vmcloak.abstract import Platform, VirtualDrive
 from vmcloak.repository import IPNet
+from vmcloak.ostype import get_os
 
 log = logging.getLogger(__name__)
 
@@ -52,6 +54,37 @@ class proxmox(Platform):
         if not self._default_net:
             self._default_net = IPNet(self.net)
         return self._default_net
+
+    def create_new_image(self, name: str, _, iso_path: str, attr: dict
+                         ) -> None:
+        prox = ProxmoxAPI(self.host, user=self.user, password=self.pw,
+                          verify_ssl=False)
+
+        vmid = self._get_new_random_vmid(prox)
+        attr["vmid"] = vmid
+
+        prox.nodes(self.node).qemu.post(
+            vmid=vmid, memory=attr["ramsize"],
+            cores=attr["cpus"],
+            cdrom=f"local:iso/{iso_path},media=cdrom,size=4266330K",
+            net0="model=e1000,bridge=vmbr0,firewall=1",
+            sata0=self.sr + ":%i,discard=on" % attr["hddsize"],
+            ostype=get_os(attr["osversion"]).name,
+            name=name)
+
+        prox.nodes(self.node).qemu(vmid).status.start.post()
+        time.sleep(self.wait)
+
+        running = True
+        while running:
+            vm_status = prox.nodes(self.node).qemu(vmid).status.current.get()
+            if vm_status is None:
+                continue
+            if vm_status["qmpstatus"] == "stopped":
+                running = False
+            time.sleep(self.wait)
+
+        attr["mac"] = ""
 
     def _get_new_random_vmid(self, prox) -> int:
         while True:
