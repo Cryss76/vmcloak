@@ -63,7 +63,7 @@ class proxmox(Platform):
         if vm_config_file.exists():
             raise ValueError("Image %s already exists" % attr["path"])
 
-        vmid = self._get_new_random_vmid(self.prox)
+        vmid = self._get_new_random_vmid()
         self.prox.nodes(self.node).qemu.post(
             vmid=vmid, memory=attr["ramsize"],
             cores=attr["cpus"],
@@ -111,7 +111,7 @@ class proxmox(Platform):
 
         oldvmid = yaml.safe_load(Path(image.path).read_text())["vmid"]
 
-        new_vmid = self._get_new_random_vmid(self.prox)
+        new_vmid = self._get_new_random_vmid()
         self.prox.nodes(self.node).qemu(oldvmid).clone.post(
             newid=new_vmid, name=target)
 
@@ -119,10 +119,10 @@ class proxmox(Platform):
 
         image.path = f"{config_file}"
 
-    def _get_new_random_vmid(self, prox) -> int:
+    def _get_new_random_vmid(self) -> int:
         while True:
             vmid = random.randint(100, 999_999_999)
-            vm_list = prox.nodes(self.node).qemu.get()
+            vm_list = self.prox.nodes(self.node).qemu.get()
             if vm_list is None:
                 log.error("Couldnt get vm list")
                 quit(1)
