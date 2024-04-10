@@ -119,6 +119,9 @@ class proxmox(Platform):
 
         image.path = f"{config_file}"
 
+    def virt_drive(self, name: str) -> VirtualDrive:
+        return ProxmoxDrive(name)
+
     def _get_new_random_vmid(self) -> int:
         while True:
             vmid = random.randint(100, 999_999_999)
