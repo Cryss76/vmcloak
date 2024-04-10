@@ -6,7 +6,7 @@ from proxmoxer import ProxmoxAPI
 from pathlib import Path
 
 from vmcloak.abstract import Platform, VirtualDrive
-from vmcloak.repository import IPNet
+from vmcloak.repository import IPNet, Image
 from vmcloak.ostype import get_os
 
 log = logging.getLogger(__name__)
@@ -91,6 +91,18 @@ class proxmox(Platform):
         vm_config_file.write_text(vm_config)
 
         attr["mac"] = ""
+
+    def remove_img(self, image: Image) -> None:
+        log.info("Removing image %s", image.path)
+
+        vm_config_file = Path(image.path)
+        vmid = yaml.safe_load(vm_config_file.read_text())["vmid"]
+
+        prox = ProxmoxAPI(self.host, user=self.user, password=self.pw,
+                          verify_ssl=False)
+        prox.nodes(self.node).qemu(vmid).delete()
+
+        vm_config_file.unlink()
 
     def _get_new_random_vmid(self, prox) -> int:
         while True:
