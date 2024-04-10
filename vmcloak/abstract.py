@@ -614,6 +614,9 @@ class Platform:
 
         The image is supposed to be saved in ~/.vmcloak/image/<platform>
         Needs rework as this is a Qemu-specific task.
+
+        attr must contain a key called mac after execution.
+        (though the mac can be just an empty string)
         """
         raise NotImplementedError
 
