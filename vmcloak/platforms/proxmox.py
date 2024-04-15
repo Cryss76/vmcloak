@@ -95,35 +95,35 @@ class proxmox(Platform):
         log.info("Removing image %s", image.path)
 
         vm_config_file = Path(image.path)
-        vmid = yaml.safe_load(vm_config_file.read_text())["vmid"]
+        vmid = self.load_vmid(vm_config_file)
 
         self.prox.nodes(self.node).qemu(vmid).delete()
 
         vm_config_file.unlink()
 
     def clone_disk(self, image: Image, target: str) -> None:
-        config_file = Path(f"{image_path}/proxmox/{target}.yml")
-        if config_file.exists():
-            log.error(f"Outpath: {config_file} already exists.")
+        new_config_file = Path(f"{image_path}/proxmox/{target}.yml")
+        if new_config_file.exists():
+            log.error(f"Outpath: {new_config_file} already exists.")
             exit(1)
 
         log.info("Cloning %s to %s", image.name, target)
 
-        oldvmid = yaml.safe_load(Path(image.path).read_text())["vmid"]
+        oldvmid = self.load_vmid(Path(image.path))
 
         new_vmid = self._get_new_random_vmid()
         self.prox.nodes(self.node).qemu(oldvmid).clone.post(
             newid=new_vmid, name=target)
 
-        config_file.write_text(yaml.dump({"vmid": new_vmid}))
+        new_config_file.write_text(yaml.dump({"vmid": new_vmid}))
 
-        image.path = f"{config_file}"
+        image.path = f"{new_config_file}"
 
     def start_image_vm(self, image: Image, user_attr: dict = {}) -> None:
         # TODO: add support for updating image attr.
         _ = user_attr
 
-        vmid = yaml.safe_load(Path(image.path).read_text())["vmid"]
+        vmid = self.load_vmid(Path(image.path))
         self.prox.nodes(self.node).qemu(vmid).status.start.post()
 
     def virt_drive(self, name: str) -> VirtualDrive:
@@ -140,6 +140,9 @@ class proxmox(Platform):
             if vmid not in vm_list:
                 break
         return vmid
+
+    def load_vmid(self, config_file: Path):
+        return yaml.safe_load(config_file.read_text())["vmid"]
 
     @property
     def prox(self):
