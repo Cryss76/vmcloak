@@ -149,6 +149,8 @@ class proxmox(Platform):
             time.sleep(self.wait)
 
         new_vmid = self._get_new_random_vmid()
+        Path(attr["path"]).write_text(yaml.dump({"vmid": new_vmid}))
+
         self.prox.nodes(self.node).qemu(vm_id).clone.post(newid=new_vmid,
                                                           name=name, full=0)
         self.prox.nodes(self.node).qemu(new_vmid).status.start.post()
