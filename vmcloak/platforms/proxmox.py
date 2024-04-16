@@ -7,7 +7,7 @@ from pathlib import Path
 from dataclasses import dataclass
 
 from vmcloak.abstract import Platform, VirtualDrive
-from vmcloak.repository import IPNet, Image, image_path
+from vmcloak.repository import IPNet, Image, image_path, find_image
 from vmcloak.ostype import get_os
 
 log = logging.getLogger(__name__)
@@ -119,6 +119,12 @@ class proxmox(Platform):
         vmid = self.load_vmid(Path(image.path))
         self.prox.nodes(self.node).qemu(vmid).status.start.post()
 
+    def wait_for_shutdown(self, name: str, timeout: int = 0) -> None:
+        image = find_image(name)
+        vmid = self.load_vmid(Path(image.path))
+
+        self._wait_for_status(vmid, _States.stopped, timeout)
+
     def virt_drive(self, name: str) -> VirtualDrive:
         return ProxmoxDrive(name)
 
@@ -137,7 +143,12 @@ class proxmox(Platform):
     def load_vmid(self, config_file: Path):
         return yaml.safe_load(config_file.read_text())["vmid"]
 
-    def _wait_for_status(self, vmid: int, status: str) -> None:
+    def _wait_for_status(self, vmid: int, status: str, timeout: int = 0
+                         ) -> None:
+        end = None
+        if timeout:
+            end = time.time() + timeout
+
         while True:
             vm_status = self.prox.nodes(self.node).qemu(
                 vmid).status.current.get()
@@ -146,6 +157,8 @@ class proxmox(Platform):
             if vm_status["qmpstatus"] == status:
                 break
             time.sleep(self.wait)
+            if end and time.time() > end:
+                raise ValueError("Timeout")
 
     @property
     def prox(self):
