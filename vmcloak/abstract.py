@@ -641,7 +641,16 @@ class Platform:
         raise NotImplementedError
 
     def prepare_snapshot(self, name: str, attr: dict) -> str:
-        """Manages snapshots folder in .vmcloak folder."""
+        """
+        Manages snapshots folder in .vmcloak folder.
+
+        Create the "vms" and the machinery folder like qemu,
+        so that a structure like "~/.vmcloak/vms/<platform>/"
+        is created.
+        Each snapshot is saved in its own folder of the coresponding
+        platform. The folders can have configs and other data in it.
+        Returns an empty string if the file already exists.
+        """
         raise NotImplementedError
 
     def create_snapshot_vm(self, image: Image, name: str, attr: dict) -> None:
