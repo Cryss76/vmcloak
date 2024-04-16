@@ -137,6 +137,22 @@ class proxmox(Platform):
 
         return str(vm_dir)
 
+    def create_snapshot_vm(self, image: Image, name: str, attr: dict) -> None:
+        vm_id = self.load_vmid(Path(image.path))
+        image_config = self.prox.nodes(self.node).qemu(vm_id).config.get()
+        if image_config is None:
+            log.error("Couldn't get image config information aborting...")
+            exit(1)
+
+        if not image_config.get("template") == 1:
+            self.prox.nodes(self.node).qemu(vm_id).template.post()
+            time.sleep(self.wait)
+
+        new_vmid = self._get_new_random_vmid()
+        self.prox.nodes(self.node).qemu(vm_id).clone.post(newid=new_vmid,
+                                                          name=name, full=0)
+        self.prox.nodes(self.node).qemu(new_vmid).status.start.post()
+
     def virt_drive(self, name: str) -> VirtualDrive:
         return ProxmoxDrive(name)
 
