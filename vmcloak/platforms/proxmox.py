@@ -7,7 +7,7 @@ from pathlib import Path
 from dataclasses import dataclass
 
 from vmcloak.abstract import Platform, VirtualDrive
-from vmcloak.repository import IPNet, Image, image_path, find_image
+from vmcloak.repository import IPNet, Image, image_path, find_image, vms_path
 from vmcloak.ostype import get_os
 
 log = logging.getLogger(__name__)
@@ -124,6 +124,18 @@ class proxmox(Platform):
         vmid = self.load_vmid(Path(image.path))
 
         self._wait_for_status(vmid, _States.stopped, timeout)
+
+    def prepare_snapshot(self, name: str, attr: dict) -> str:
+        vm_dir = Path(f"{vms_path}/proxmox/{name}")
+        vm_dir.mkdir(parents=True, mode=0o775, exist_ok=True)
+
+        vm_dir = vm_dir/f"config.yml"
+        attr["path"] = str(vm_dir)
+
+        if vm_dir.exists():
+            return ""
+
+        return str(vm_dir)
 
     def virt_drive(self, name: str) -> VirtualDrive:
         return ProxmoxDrive(name)
