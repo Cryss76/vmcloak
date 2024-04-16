@@ -129,10 +129,10 @@ class proxmox(Platform):
         vm_dir = Path(f"{vms_path}/proxmox/{name}")
         vm_dir.mkdir(parents=True, mode=0o775, exist_ok=True)
 
-        vm_dir = vm_dir/f"config.yml"
-        attr["path"] = str(vm_dir)
+        path = vm_dir/f"config.yml"
+        attr["path"] = str(path)
 
-        if vm_dir.exists():
+        if path.exists():
             return ""
 
         return str(vm_dir)
