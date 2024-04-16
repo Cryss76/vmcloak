@@ -155,6 +155,17 @@ class proxmox(Platform):
                                                           name=name, full=0)
         self.prox.nodes(self.node).qemu(new_vmid).status.start.post()
 
+    def create_snapshot(self, name: str) -> None:
+        vm_id = self.load_vmid(Path(f"{vms_path}/proxmox/{name}/config.yml"))
+
+        self.prox.nodes(self.node).qemu(vm_id).status.suspend.post()
+        self._wait_for_status(vm_id, _States.suspended)
+        self.prox.nodes(self.node).qemu(vm_id).snapshot.post(
+            snapname="vmcloak", vmstate=1)
+        self._wait_for_status(vm_id, _States.migrated)
+        self.prox.nodes(self.node).qemu(vm_id).status.stop.post()
+        self._wait_for_status(vm_id, _States.stopped)
+
     def virt_drive(self, name: str) -> VirtualDrive:
         return ProxmoxDrive(name)
 
@@ -215,4 +226,5 @@ class _States:
     """Represents states of a VM"""
     stopped: str = "stopped"
     running: str = "running"
-    suspended: str = "suspended"
+    suspended: str = "paused"
+    migrated: str = "finish-migrate"
