@@ -4,6 +4,7 @@ import random
 import time
 from proxmoxer import ProxmoxAPI
 from pathlib import Path
+from dataclasses import dataclass
 
 from vmcloak.abstract import Platform, VirtualDrive
 from vmcloak.repository import IPNet, Image, image_path
@@ -76,15 +77,7 @@ class proxmox(Platform):
         self.prox.nodes(self.node).qemu(vmid).status.start.post()
         time.sleep(self.wait)
 
-        running = True
-        while running:
-            vm_status = self.prox.nodes(self.node).qemu(
-                vmid).status.current.get()
-            if vm_status is None:
-                continue
-            if vm_status["qmpstatus"] == "stopped":
-                running = False
-            time.sleep(self.wait)
+        self._wait_for_status(vmid, _States.stopped)
 
         vm_config = yaml.dump({"vmid": vmid})
         vm_config_file.write_text(vm_config)
@@ -144,6 +137,16 @@ class proxmox(Platform):
     def load_vmid(self, config_file: Path):
         return yaml.safe_load(config_file.read_text())["vmid"]
 
+    def _wait_for_status(self, vmid: int, status: str) -> None:
+        while True:
+            vm_status = self.prox.nodes(self.node).qemu(
+                vmid).status.current.get()
+            if vm_status is None:
+                continue
+            if vm_status["qmpstatus"] == status:
+                break
+            time.sleep(self.wait)
+
     @property
     def prox(self):
         if self._connection:
@@ -162,3 +165,11 @@ class proxmox(Platform):
 
 class ProxmoxDrive(VirtualDrive):
     pass
+
+
+@dataclass
+class _States:
+    """Represents states of a VM"""
+    stopped: str = "stopped"
+    running: str = "running"
+    suspended: str = "suspended"
